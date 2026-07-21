@@ -1,0 +1,128 @@
+.stat-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-left: 4px solid var(--main-blue);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-card-left {
+  flex: 1;
+}
+
+.stat-card-title {
+  font-size: 14px;
+  color: var(--text-light);
+  font-weight: 500;
+  margin: 0 0 4px 0;
+}
+
+.stat-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.stat-card-subtitle {
+  font-size: 13px;
+  color: var(--text-light);
+  margin: 4px 0 0 0;
+}
+
+.stat-card-icon {
+  font-size: 36px;
+  color: var(--main-blue);
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: var(--light-gray);
+  border-radius: 12px;
+}
+
+/* Colors */
+.stat-card-blue {
+  border-left-color: var(--main-blue);
+}
+
+.stat-card-blue .stat-card-icon {
+  color: var(--main-blue);
+}
+
+.stat-card-green {
+  border-left-color: var(--accent-green);
+}
+
+.stat-card-green .stat-card-icon {
+  color: var(--accent-green);
+}
+
+.stat-card-yellow {
+  border-left-color: var(--accent-yellow);
+}
+
+.stat-card-yellow .stat-card-icon {
+  color: var(--accent-yellow);
+}
+
+.stat-card-red {
+  border-left-color: var(--accent-red);
+}
+
+.stat-card-red .stat-card-icon {
+  color: var(--accent-red);
+}
+
+.stat-card-purple {
+  border-left-color: #7C3AED;
+}
+
+.stat-card-purple .stat-card-icon {
+  color: #7C3AED;
+}
+
+.stat-card-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--medium-gray);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-trend {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.trend-up {
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.trend-down {
+  color: var(--error);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.stat-trend-label {
+  font-size: 13px;
+  color: var(--text-light);
+}

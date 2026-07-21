@@ -1,0 +1,83 @@
+.recent-activity-card {
+  height: 100%;
+}
+
+.activity-timeline {
+  padding: 4px 0;
+}
+
+.activity-item {
+  display: flex;
+  gap: 16px;
+  padding: 12px 0;
+  position: relative;
+}
+
+.activity-last {
+  padding-bottom: 0;
+}
+
+.activity-icon-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--white);
+  z-index: 1;
+}
+
+.activity-line {
+  width: 2px;
+  height: calc(100% - 20px);
+  background: var(--medium-gray);
+  margin-top: 4px;
+}
+
+.activity-blue { background: var(--main-blue); }
+.activity-green { background: var(--accent-green); }
+.activity-yellow { background: var(--accent-yellow); color: var(--dark-blue); }
+.activity-red { background: var(--accent-red); }
+.activity-purple { background: #7C3AED; }
+
+.activity-content {
+  flex: 1;
+  padding-top: 2px;
+}
+
+.activity-title {
+  font-size: 14px;
+  color: var(--text-dark);
+  margin: 0 0 4px 0;
+  line-height: 1.4;
+}
+
+.activity-time {
+  font-size: 12px;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.activity-time svg {
+  font-size: 12px;
+}
+
+.activity-loading,
+.activity-empty {
+  padding: 30px 0;
+  text-align: center;
+  color: var(--text-light);
+  font-size: 14px;
+}

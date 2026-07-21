@@ -1,0 +1,117 @@
+.quick-actions-card {
+  height: 100%;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 2px solid var(--medium-gray);
+  background: var(--white);
+  color: var(--text-dark);
+  text-align: center;
+  min-height: 80px;
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.quick-action-icon {
+  font-size: 24px;
+}
+
+.quick-action-title {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.quick-action-yellow {
+  border-color: var(--accent-yellow);
+}
+
+.quick-action-yellow .quick-action-icon {
+  color: var(--accent-yellow);
+}
+
+.quick-action-yellow:hover {
+  border-color: var(--accent-yellow);
+  background: rgba(253, 184, 19, 0.05);
+}
+
+.quick-action-blue {
+  border-color: var(--main-blue);
+}
+
+.quick-action-blue .quick-action-icon {
+  color: var(--main-blue);
+}
+
+.quick-action-blue:hover {
+  border-color: var(--main-blue);
+  background: rgba(27, 77, 139, 0.05);
+}
+
+.quick-action-green {
+  border-color: var(--accent-green);
+}
+
+.quick-action-green .quick-action-icon {
+  color: var(--accent-green);
+}
+
+.quick-action-green:hover {
+  border-color: var(--accent-green);
+  background: rgba(26, 138, 74, 0.05);
+}
+
+.quick-action-purple {
+  border-color: #7C3AED;
+}
+
+.quick-action-purple .quick-action-icon {
+  color: #7C3AED;
+}
+
+.quick-action-purple:hover {
+  border-color: #7C3AED;
+  background: rgba(124, 58, 237, 0.05);
+}
+
+.quick-action-red {
+  border-color: var(--accent-red);
+}
+
+.quick-action-red .quick-action-icon {
+  color: var(--accent-red);
+}
+
+.quick-action-red:hover {
+  border-color: var(--accent-red);
+  background: rgba(211, 47, 47, 0.05);
+}
+
+@media (max-width: 768px) {
+  .quick-actions-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,127 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-family);
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Variants */
+.btn-primary {
+  background: var(--main-blue);
+  color: var(--white);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--dark-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(27, 77, 139, 0.3);
+}
+
+.btn-secondary {
+  background: var(--medium-gray);
+  color: var(--text-dark);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--dark-gray);
+  color: var(--white);
+}
+
+.btn-success {
+  background: var(--accent-green);
+  color: var(--white);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #14693A;
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: var(--accent-red);
+  color: var(--white);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #B71C1C;
+  transform: translateY(-2px);
+}
+
+.btn-warning {
+  background: var(--accent-yellow);
+  color: var(--dark-blue);
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: #E5A800;
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--main-blue);
+  border: 2px solid var(--main-blue);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--main-blue);
+  color: var(--white);
+}
+
+/* Sizes */
+.btn-small {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.btn-medium {
+  padding: 10px 24px;
+  font-size: 15px;
+}
+
+.btn-large {
+  padding: 14px 32px;
+  font-size: 17px;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+/* Loading */
+.btn-loading {
+  position: relative;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-icon {
+  display: inline-flex;
+  font-size: 18px;
+}

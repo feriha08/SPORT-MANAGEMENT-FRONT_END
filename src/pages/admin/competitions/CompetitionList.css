@@ -1,0 +1,285 @@
+.competition-list-page {
+  padding: 0;
+}
+
+/* Stats Summary */
+.stats-summary {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-icon {
+  font-size: 24px;
+  color: var(--main-blue);
+}
+
+.stat-item div {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* Competition Grid */
+.competitions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.competition-card {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.competition-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.competition-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 16px 0 16px;
+}
+
+.competition-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--light-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--main-blue);
+}
+
+.competition-status {
+  padding-top: 4px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-draft {
+  background: var(--medium-gray);
+  color: var(--text-light);
+}
+
+.status-open {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3B82F6;
+}
+
+.status-ongoing {
+  background: rgba(245, 158, 11, 0.1);
+  color: #F59E0B;
+}
+
+.status-completed {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.status-closed {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.competition-card-body {
+  padding: 16px;
+}
+
+.competition-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 8px 0;
+}
+
+.competition-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.sport-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.sport-football {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.sport-volleyball {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8B5CF6;
+}
+
+.sport-basketball {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.sport-other {
+  background: var(--medium-gray);
+  color: var(--text-light);
+}
+
+.competition-gender {
+  font-size: 12px;
+  color: var(--text-light);
+  background: var(--light-gray);
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.competition-details {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.competition-details .detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.competition-details .detail svg {
+  font-size: 14px;
+}
+
+.registration-open {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.competition-card-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--light-gray);
+  border-top: 1px solid var(--medium-gray);
+}
+
+.competition-card-footer .btn {
+  flex: 1;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.btn-info {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3B82F6;
+}
+
+.btn-info:hover {
+  background: #3B82F6;
+  color: var(--white);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .competitions-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .filters-container {
+    flex-direction: column;
+  }
+  
+  .search-form {
+    min-width: unset;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+  }
+  
+  .filter-item {
+    width: 100%;
+  }
+  
+  .filter-select {
+    flex: 1;
+  }
+  
+  .competitions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-summary {
+    gap: 12px;
+  }
+  
+  .stat-item {
+    flex: 1;
+    min-width: calc(50% - 12px);
+  }
+}
+
+@media (max-width: 480px) {
+  .competition-card-footer {
+    flex-wrap: wrap;
+  }
+  
+  .competition-card-footer .btn {
+    flex: 1;
+    min-width: calc(50% - 4px);
+  }
+}

@@ -1,0 +1,71 @@
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Primary Colors */
+  --main-blue: #1B4D8B;
+  --dark-blue: #0D2B4B;
+  --light-blue: #3A7BD5;
+  --accent-green: #1A8A4A;
+  --accent-yellow: #FDB813;
+  --accent-red: #D32F2F;
+  
+  /* Neutral Colors */
+  --white: #FFFFFF;
+  --light-gray: #F5F7FA;
+  --medium-gray: #E8ECF1;
+  --dark-gray: #2C3E50;
+  --text-dark: #1A1A2E;
+  --text-light: #6B7280;
+  
+  /* Status Colors */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+  
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--light-gray);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: var(--main-blue);
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 8px;
+  }
+}
