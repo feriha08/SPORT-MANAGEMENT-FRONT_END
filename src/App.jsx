@@ -13,6 +13,7 @@ import CreateUser from './pages/admin/users/CreateUser';
 import EditUser from './pages/admin/users/EditUser';
 import SchoolList from './pages/admin/schools/SchoolList';
 import CreateSchool from './pages/admin/schools/CreateSchool';
+import EditSchool from './pages/admin/schools/EditSchool';
 import StudentList from './pages/admin/students/StudentList';
 import CreateStudent from './pages/admin/students/CreateStudent';
 import StudentProfile from './pages/public/StudentProfile';
@@ -27,6 +28,9 @@ import RegisterSchool from './pages/school/RegisterSchool';
 import SchoolProfile from './pages/school/SchoolProfile';
 import RefereeDashboard from './pages/referee/Dashboard';
 import PublicDashboard from './pages/public/Home';
+import SchoolDetail from './pages/admin/schools/SchoolDetail';
+import StudentDetail from './pages/admin/students/StudentDetail';
+import EditStudent from './pages/admin/students/EditStudent';
 import './index.css';
 
 function App() {
@@ -82,6 +86,16 @@ function App() {
           />
           
           <Route 
+            path="/admin/schools/:id" 
+            element={
+              <ProtectedRoute allowedRoles={['Super Admin']}>
+                <DashboardLayout>
+                  <SchoolDetail />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
             path="/admin/users/:id/edit" 
             element={
               <ProtectedRoute allowedRoles={['Super Admin']}>
@@ -91,7 +105,26 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          
+          <Route 
+            path="/admin/students/:id" 
+            element={
+              <ProtectedRoute allowedRoles={['Super Admin']}>
+                <DashboardLayout>
+                  <StudentDetail />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />       
+          <Route 
+            path="/admin/students/:id/edit" 
+            element={
+              <ProtectedRoute allowedRoles={['Super Admin']}>
+                <DashboardLayout>
+                  <EditStudent />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />
           {/* School Management */}
           <Route 
             path="/admin/schools" 
@@ -110,6 +143,17 @@ function App() {
               <ProtectedRoute allowedRoles={['Super Admin']}>
                 <DashboardLayout>
                   <CreateSchool />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/admin/schools/:id/edit" 
+            element={
+              <ProtectedRoute allowedRoles={['Super Admin']}>
+                <DashboardLayout>
+                  <EditSchool />
                 </DashboardLayout>
               </ProtectedRoute>
             } 

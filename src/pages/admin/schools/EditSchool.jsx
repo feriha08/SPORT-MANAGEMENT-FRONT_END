@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { toast } from 'react-toastify';
 import { 
   FaArrowLeft, FaSchool, FaMapMarkerAlt, FaCity, 
-  FaEnvelope, FaPhone, FaSave, FaImage, FaGlobe, FaBuilding
+  FaEnvelope, FaPhone, FaSave, FaImage, FaGlobe, FaBuilding,
+  FaTrash, FaSync, FaCheck, FaTimes
 } from 'react-icons/fa';
 import axiosInstance from '../../../api/axios';
 import Card from '../../../components/common/Card';
@@ -26,10 +27,16 @@ const schoolSchema = yup.object({
   logo: yup.mixed().nullable(),
 });
 
-const CreateSchool = () => {
-  const [loading, setLoading] = useState(false);
-  const [logoPreview, setLogoPreview] = useState(null);
+const EditSchool = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [fetchingData, setFetchingData] = useState(true);
+  const [schoolData, setSchoolData] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   const {
     register,
@@ -47,7 +54,6 @@ const CreateSchool = () => {
       email: '',
       phone_number: '',
       address: '',
-      logo: null,
     },
   });
 
@@ -67,10 +73,42 @@ const CreateSchool = () => {
     { value: 'high', label: 'High School' }
   ];
 
+  useEffect(() => {
+    fetchSchoolData();
+  }, [id]);
+
+  const fetchSchoolData = async () => {
+    try {
+      const response = await axiosInstance.get(`schools/${id}/`);
+      const school = response.data;
+      setSchoolData(school);
+      setIsActive(school.is_active);
+      
+      setValue('name', school.name || '');
+      setValue('school_id', school.school_id || '');
+      setValue('region', school.region || '');
+      setValue('district', school.district || '');
+      setValue('school_level', school.school_level || '');
+      setValue('email', school.email || '');
+      setValue('phone_number', school.phone_number || '');
+      setValue('address', school.address || '');
+      
+      if (school.logo) {
+        setLogoPreview(school.logo);
+      }
+    } catch (error) {
+      console.error('Error fetching school:', error);
+      toast.error('Failed to load school data');
+      navigate('/admin/schools');
+    } finally {
+      setFetchingData(false);
+    }
+  };
+
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setValue('logo', file);
+      setLogoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setLogoPreview(reader.result);
@@ -91,36 +129,30 @@ const CreateSchool = () => {
       formData.append('email', data.email);
       formData.append('phone_number', data.phone_number);
       formData.append('address', data.address);
-      
-      // IMPORTANT: Add logo if exists
-      if (data.logo) {
-        formData.append('logo', data.logo);
-        console.log('📤 Logo file attached:', data.logo.name);
+      if (logoFile) {
+        formData.append('logo', logoFile);
       }
 
-      console.log('📤 Creating school with formData:');
-      for (let [key, value] of formData.entries()) {
-        console.log(`   ${key}: ${value instanceof File ? value.name : value}`);
-      }
+      console.log('📤 Updating school with data:', data);
 
-      const response = await axiosInstance.post('schools/create/', formData, {
+      const response = await axiosInstance.put(`schools/${id}/manage/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      console.log('✅ School created:', response.data);
-      toast.success('🎉 School created successfully!');
+      console.log('✅ School updated:', response.data);
+      toast.success('🎉 School updated successfully!');
       
       setTimeout(() => {
         navigate('/admin/schools');
       }, 1500);
     } catch (error) {
-      console.error('❌ Error creating school:', error);
+      console.error('❌ Error updating school:', error);
       
       if (error.response) {
         const errorData = error.response.data;
-        let errorMessage = 'Failed to create school. ';
+        let errorMessage = 'Failed to update school. ';
         
         if (typeof errorData === 'object') {
           const errors = [];
@@ -137,14 +169,49 @@ const CreateSchool = () => {
         }
         toast.error(errorMessage);
       } else {
-        toast.error('Failed to create school. Please try again.');
+        toast.error('Failed to update school. Please try again.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
+  const handleToggleStatus = async () => {
+    try {
+      const response = await axiosInstance.put(`schools/${id}/activate/`, {
+        is_active: !isActive
+      });
+      setIsActive(!isActive);
+      toast.success(`School ${!isActive ? 'activated' : 'deactivated'} successfully`);
+      fetchSchoolData();
+    } catch (error) {
+      console.error('Toggle status error:', error);
+      toast.error('Failed to toggle school status');
+    }
+  };
+
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await axiosInstance.delete(`schools/${id}/delete/`);
+      toast.success('School deleted successfully');
+      setShowDeleteModal(false);
+      navigate('/admin/schools');
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Failed to delete school');
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchSchoolData();
+    toast.info('Data refreshed');
+  };
+
+  if (fetchingData) {
     return <LoadingSpinner fullPage />;
   }
 
@@ -155,9 +222,31 @@ const CreateSchool = () => {
           <FaArrowLeft /> Back
         </Link>
         <div>
-          <h1 className="form-title">Create School</h1>
-          <p className="form-subtitle">Add a new school to the system (Super Admin)</p>
+          <h1 className="form-title">Edit School</h1>
+          <p className="form-subtitle">Update school information</p>
         </div>
+        <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+          <button onClick={handleRefresh} className="btn btn-secondary" title="Refresh data">
+            <FaSync /> Refresh
+          </button>
+          <button 
+            onClick={handleToggleStatus} 
+            className={`btn ${isActive ? 'btn-warning' : 'btn-success'}`}
+          >
+            {isActive ? <FaTimes /> : <FaCheck />} 
+            {isActive ? 'Deactivate' : 'Activate'}
+          </button>
+          <button onClick={handleDelete} className="btn btn-danger">
+            <FaTrash /> Delete
+          </button>
+        </div>
+      </div>
+
+      {/* Status Badge */}
+      <div className="status-badge-container">
+        <span className={`status-badge-large ${isActive ? 'status-active' : 'status-inactive'}`}>
+          Status: {isActive ? 'Active' : 'Inactive'}
+        </span>
       </div>
 
       <Card className="form-card">
@@ -347,7 +436,7 @@ const CreateSchool = () => {
                         className="remove-logo"
                         onClick={() => {
                           setLogoPreview(null);
-                          setValue('logo', null);
+                          setLogoFile(null);
                         }}
                       >
                         ✕
@@ -383,19 +472,43 @@ const CreateSchool = () => {
               {loading ? (
                 <>
                   <span className="spinner"></span>
-                  Creating...
+                  Updating...
                 </>
               ) : (
                 <>
-                  <FaSave /> Create School
+                  <FaSave /> Update School
                 </>
               )}
             </button>
           </div>
         </form>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Delete School</h3>
+              <button className="modal-close" onClick={() => setShowDeleteModal(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete <strong>{schoolData?.name}</strong>?</p>
+              <p className="modal-warning">This action cannot be undone. All associated data will be deleted.</p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowDeleteModal(false)}>
+                Cancel
+              </button>
+              <button className="btn btn-danger" onClick={confirmDelete}>
+                Delete School
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default CreateSchool;
+export default EditSchool;

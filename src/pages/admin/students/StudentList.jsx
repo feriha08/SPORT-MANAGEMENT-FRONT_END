@@ -135,6 +135,15 @@ const StudentList = () => {
     toast.info('Data refreshed');
   };
 
+  const getImageUrl = (profilePicture) => {
+    if (!profilePicture) return null;
+    if (profilePicture.startsWith('http://') || profilePicture.startsWith('https://')) {
+      return profilePicture;
+    }
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/';
+    return `${baseUrl}${profilePicture.replace(/^\//, '')}`;
+  };
+
   const getGenderIcon = (gender) => {
     if (gender === 'Male' || gender === 'male') return <FaMale />;
     if (gender === 'Female' || gender === 'female') return <FaFemale />;
@@ -160,16 +169,13 @@ const StudentList = () => {
     return isActive ? 'status-active' : 'status-inactive';
   };
 
-  // Helper function to get image URL
-  const getImageUrl = (profilePicture) => {
-    if (!profilePicture) return null;
-    // If it's already a full URL, return as is
-    if (profilePicture.startsWith('http://') || profilePicture.startsWith('https://')) {
-      return profilePicture;
-    }
-    // Otherwise, prepend the base URL
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/';
-    return `${baseUrl}${profilePicture.replace(/^\//, '')}`;
+  const getLevelDisplay = (level) => {
+    const levels = {
+      'primary': 'Primary School',
+      'secondary': 'Secondary School',
+      'high': 'High School'
+    };
+    return levels[level] || level;
   };
 
   const renderPagination = () => {

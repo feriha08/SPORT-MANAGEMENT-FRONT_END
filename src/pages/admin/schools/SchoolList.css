@@ -298,6 +298,7 @@
   color: var(--main-blue);
 }
 
+/* ===== SCHOOL CARD FOOTER - FIXED ===== */
 .school-card-footer {
   display: flex;
   gap: 8px;
@@ -310,6 +311,68 @@
   flex: 1;
   padding: 6px 12px;
   font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: var(--font-family);
+  text-decoration: none;
+}
+
+.school-card-footer .btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* Button Variants */
+.school-card-footer .btn-primary {
+  background: var(--main-blue);
+  color: var(--white);
+}
+
+.school-card-footer .btn-primary:hover {
+  background: var(--dark-blue);
+}
+
+.school-card-footer .btn-secondary {
+  background: var(--medium-gray);
+  color: var(--text-dark);
+}
+
+.school-card-footer .btn-secondary:hover {
+  background: var(--dark-gray);
+  color: var(--white);
+}
+
+.school-card-footer .btn-success {
+  background: var(--accent-green);
+  color: var(--white);
+}
+
+.school-card-footer .btn-success:hover {
+  background: #14693A;
+}
+
+.school-card-footer .btn-warning {
+  background: var(--accent-yellow);
+  color: var(--dark-blue);
+}
+
+.school-card-footer .btn-warning:hover {
+  background: #E5A800;
+}
+
+.school-card-footer .btn-danger {
+  background: var(--accent-red);
+  color: var(--white);
+}
+
+.school-card-footer .btn-danger:hover {
+  background: #B71C1C;
 }
 
 /* School Table */

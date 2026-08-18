@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { toast } from 'react-toastify';
 import { 
   FaArrowLeft, FaUser, FaCalendarAlt, FaSave, FaImage,
-  FaUsers, FaMale, FaFemale, FaSchool, FaTrophy
+  FaUsers, FaSchool, FaTrophy, FaTrash, FaCheck, FaTimes
 } from 'react-icons/fa';
 import axiosInstance from '../../../api/axios';
-import { useAuth } from '../../../context/authContext';
 import Card from '../../../components/common/Card';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
 import '../competitions/CompetitionForm.css';
 
-// Validation schema
 const studentSchema = yup.object({
   full_name: yup.string().required('Full name is required'),
   gender: yup.string().required('Gender is required'),
@@ -25,19 +23,24 @@ const studentSchema = yup.object({
   is_active: yup.boolean(),
 });
 
-const CreateStudent = () => {
+const EditStudent = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(true);
   const [schools, setSchools] = useState([]);
   const [sports, setSports] = useState([]);
+  const [studentData, setStudentData] = useState(null);
   const [profilePreview, setProfilePreview] = useState(null);
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const [profileFile, setProfileFile] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isActive, setIsActive] = useState(true);
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(studentSchema),
@@ -54,19 +57,44 @@ const CreateStudent = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [id]);
 
   const fetchData = async () => {
     try {
-      const [schoolsRes, sportsRes] = await Promise.all([
+      const [studentRes, schoolsRes, sportsRes] = await Promise.all([
+        axiosInstance.get(`students/${id}/`),
         axiosInstance.get('schools/'),
         axiosInstance.get('sports/')
       ]);
+      
+      const student = studentRes.data;
+      setStudentData(student);
+      
+      // IMPORTANT: Set isActive correctly
+      setIsActive(student.is_active === true);
+      
+      setValue('full_name', student.full_name || '');
+      setValue('gender', student.gender || '');
+      setValue('date_of_birth', student.date_of_birth || '');
+      setValue('school', student.school || '');
+      setValue('is_active', student.is_active === true);
+      
+      // Handle sports
+      if (student.sport_assignments && student.sport_assignments.length > 0) {
+        const sportIds = student.sport_assignments.map(s => s.sport);
+        setValue('sports', sportIds);
+      }
+      
+      if (student.profile_picture) {
+        setProfilePreview(student.profile_picture);
+      }
+      
       setSchools(schoolsRes.data.results || schoolsRes.data || []);
       setSports(sportsRes.data.results || sportsRes.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error('Failed to load form data');
+      toast.error('Failed to load student data');
+      navigate('/admin/students');
     } finally {
       setFetchingData(false);
     }
@@ -75,7 +103,7 @@ const CreateStudent = () => {
   const handleProfileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setValue('profile_picture', file);
+      setProfileFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePreview(reader.result);
@@ -94,56 +122,69 @@ const CreateStudent = () => {
       formData.append('school', data.school);
       formData.append('is_active', data.is_active ? 'true' : 'false');
       
-      // IMPORTANT: Send sports as JSON string
+      // Send sports as JSON
       if (data.sports && data.sports.length > 0) {
         formData.append('sports', JSON.stringify(data.sports));
-        console.log('📤 Sports to assign:', data.sports);
       }
 
-      if (data.profile_picture) {
-        formData.append('profile_picture', data.profile_picture);
+      if (profileFile) {
+        formData.append('profile_picture', profileFile);
       }
 
-      console.log('📤 Creating student with data:', data);
+      console.log('📤 Updating student:', data);
 
-      const response = await axiosInstance.post('students/create/', formData, {
+      const response = await axiosInstance.put(`students/${id}/manage/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      console.log('✅ Student created:', response.data);
-      toast.success('🎉 Student created successfully!');
+      console.log('✅ Student updated:', response.data);
+      toast.success('🎉 Student updated successfully!');
       
       setTimeout(() => {
         navigate('/admin/students');
       }, 1500);
     } catch (error) {
-      console.error('❌ Error creating student:', error);
-      
+      console.error('❌ Error updating student:', error);
       if (error.response) {
-        const errorData = error.response.data;
-        let errorMessage = 'Failed to create student. ';
-        
-        if (typeof errorData === 'object') {
-          const errors = [];
-          for (const [field, messages] of Object.entries(errorData)) {
-            if (Array.isArray(messages)) {
-              errors.push(`${field}: ${messages.join(', ')}`);
-            } else if (typeof messages === 'string') {
-              errors.push(`${field}: ${messages}`);
-            }
-          }
-          if (errors.length > 0) {
-            errorMessage = errors.join('\n');
-          }
-        }
-        toast.error(errorMessage);
+        toast.error(error.response.data?.detail || 'Failed to update student');
       } else {
-        toast.error('Failed to create student. Please try again.');
+        toast.error('Failed to update student. Please try again.');
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleStatus = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('is_active', (!isActive).toString());
+      
+      await axiosInstance.put(`students/${id}/manage/`, formData);
+      setIsActive(!isActive);
+      toast.success(`Student ${!isActive ? 'activated' : 'deactivated'} successfully`);
+      fetchData();
+    } catch (error) {
+      console.error('Toggle status error:', error);
+      toast.error('Failed to toggle student status');
+    }
+  };
+
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await axiosInstance.delete(`students/${id}/manage/`);
+      toast.success('Student deleted successfully');
+      setShowDeleteModal(false);
+      navigate('/admin/students');
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Failed to delete student');
     }
   };
 
@@ -158,9 +199,27 @@ const CreateStudent = () => {
           <FaArrowLeft /> Back
         </Link>
         <div>
-          <h1 className="form-title">Create Student</h1>
-          <p className="form-subtitle">Add a new student to the system</p>
+          <h1 className="form-title">Edit Student</h1>
+          <p className="form-subtitle">Update student information</p>
         </div>
+        <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+          <button 
+            onClick={handleToggleStatus} 
+            className={`btn ${isActive ? 'btn-warning' : 'btn-success'}`}
+          >
+            {isActive ? <FaTimes /> : <FaCheck />} 
+            {isActive ? 'Deactivate' : 'Activate'}
+          </button>
+          <button onClick={handleDelete} className="btn btn-danger">
+            <FaTrash /> Delete
+          </button>
+        </div>
+      </div>
+
+      <div className="status-badge-container">
+        <span className={`status-badge-large ${isActive ? 'status-active' : 'status-inactive'}`}>
+          Status: {isActive ? 'Active' : 'Inactive'}
+        </span>
       </div>
 
       <Card className="form-card">
@@ -294,7 +353,7 @@ const CreateStudent = () => {
                         className="remove-logo"
                         onClick={() => {
                           setProfilePreview(null);
-                          setValue('profile_picture', null);
+                          setProfileFile(null);
                         }}
                       >
                         ✕
@@ -346,19 +405,43 @@ const CreateStudent = () => {
               {loading ? (
                 <>
                   <span className="spinner"></span>
-                  Creating...
+                  Updating...
                 </>
               ) : (
                 <>
-                  <FaSave /> Create Student
+                  <FaSave /> Update Student
                 </>
               )}
             </button>
           </div>
         </form>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Delete Student</h3>
+              <button className="modal-close" onClick={() => setShowDeleteModal(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete <strong>{studentData?.full_name}</strong>?</p>
+              <p className="modal-warning">This action cannot be undone.</p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowDeleteModal(false)}>
+                Cancel
+              </button>
+              <button className="btn btn-danger" onClick={confirmDelete}>
+                Delete Student
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default CreateStudent;
+export default EditStudent;

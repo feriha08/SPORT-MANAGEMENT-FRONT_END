@@ -33,6 +33,16 @@ const SchoolList = () => {
     'high': 'High School'
   };
 
+  // Helper function to get image URL
+  const getImageUrl = (logo) => {
+    if (!logo) return null;
+    if (logo.startsWith('http://') || logo.startsWith('https://')) {
+      return logo;
+    }
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/';
+    return `${baseUrl}${logo.replace(/^\//, '')}`;
+  };
+
   useEffect(() => {
     fetchSchools();
   }, [currentPage, regionFilter, levelFilter, statusFilter]);
@@ -62,12 +72,14 @@ const SchoolList = () => {
         params._ = Date.now();
       }
 
-      const response = await axiosInstance.get('schools/', { params });
+      // Use admin endpoint to get all schools (including inactive)
+      const response = await axiosInstance.get('schools/admin/', { params });
       console.log('Schools response:', response.data);
       
       const schoolsData = response.data.results || response.data || [];
       setSchools(schoolsData);
       
+      // Extract unique regions
       const uniqueRegions = [...new Set(schoolsData.map(s => s.region).filter(Boolean))];
       setRegions(uniqueRegions);
       
@@ -334,66 +346,76 @@ const SchoolList = () => {
               </Link>
             </div>
           ) : (
-            schools.map((school) => (
-              <div key={school.id} className="school-card">
-                <div className="school-card-header">
-                  <div className="school-logo">
-                    {school.logo ? (
-                      <img src={school.logo} alt={school.name} />
-                    ) : (
-                      <FaSchool className="logo-placeholder" />
-                    )}
-                  </div>
-                  <div className="school-card-status">
-                    <span className={`status-badge ${getStatusBadgeClass(school.is_active)}`}>
-                      {school.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-                </div>
-                <div className="school-card-body">
-                  <h3 className="school-name">{school.name}</h3>
-                  <p className="school-id-text">ID: {school.school_id || school.id}</p>
-                  <div className="school-details">
-                    <span className="school-detail">
-                      <FaMapMarkerAlt /> {school.region || 'N/A'}
-                    </span>
-                    <span className={`level-badge ${getLevelBadgeClass(school.school_level)}`}>
-                      {getLevelDisplay(school.school_level)}
-                    </span>
-                  </div>
-                  <div className="school-stats">
-                    <div className="stat">
-                      <FaUsers />
-                      <span>{school.student_count || 0} Students</span>
+            schools.map((school) => {
+              const logoUrl = getImageUrl(school.logo);
+              return (
+                <div key={school.id} className="school-card">
+                  <div className="school-card-header">
+                    <div className="school-logo">
+                      {logoUrl ? (
+                        <img 
+                          src={logoUrl} 
+                          alt={school.name}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.parentElement.innerHTML = `<span class="logo-placeholder"><svg class="logo-placeholder-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l11 6 11-6-11-6zm0 11.5L3.5 9.5 12 5l8.5 4.5L12 14.5z"/><path d="M12 22l-11-6v-2.5l11 6 11-6V16l-11 6z"/></svg></span>`;
+                          }}
+                        />
+                      ) : (
+                        <FaSchool className="logo-placeholder" />
+                      )}
                     </div>
-                    <div className="stat">
-                      <FaTrophy />
-                      <span>{school.competition_count || 0} Competitions</span>
+                    <div className="school-card-status">
+                      <span className={`status-badge ${getStatusBadgeClass(school.is_active)}`}>
+                        {school.is_active ? 'Active' : 'Inactive'}
+                      </span>
                     </div>
                   </div>
+                  <div className="school-card-body">
+                    <h3 className="school-name">{school.name}</h3>
+                    <p className="school-id-text">ID: {school.school_id || school.id}</p>
+                    <div className="school-details">
+                      <span className="school-detail">
+                        <FaMapMarkerAlt /> {school.region || 'N/A'}
+                      </span>
+                      <span className={`level-badge ${getLevelBadgeClass(school.school_level)}`}>
+                        {getLevelDisplay(school.school_level)}
+                      </span>
+                    </div>
+                    <div className="school-stats">
+                      <div className="stat">
+                        <FaUsers />
+                        <span>{school.student_count || 0} Students</span>
+                      </div>
+                      <div className="stat">
+                        <FaTrophy />
+                        <span>{school.competition_count || 0} Competitions</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="school-card-footer">
+                    <Link to={`/admin/schools/${school.id}`} className="btn btn-sm btn-primary">
+                      <FaEye /> View
+                    </Link>
+                    <Link to={`/admin/schools/${school.id}/edit`} className="btn btn-sm btn-secondary">
+                      <FaEdit /> Edit
+                    </Link>
+                    <button 
+                      onClick={() => handleToggleStatus(school)}
+                      className={`btn btn-sm ${school.is_active ? 'btn-warning' : 'btn-success'}`}
+                    >
+                      {school.is_active ? <FaTimes /> : <FaCheck />}
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(school)}
+                      className="btn btn-sm btn-danger"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
                 </div>
-                <div className="school-card-footer">
-                  <Link to={`/admin/schools/${school.id}`} className="btn btn-sm btn-primary">
-                    <FaEye /> View
-                  </Link>
-                  <Link to={`/admin/schools/${school.id}/edit`} className="btn btn-sm btn-secondary">
-                    <FaEdit /> Edit
-                  </Link>
-                  <button 
-                    onClick={() => handleToggleStatus(school)}
-                    className={`btn btn-sm ${school.is_active ? 'btn-warning' : 'btn-success'}`}
-                  >
-                    {school.is_active ? <FaTimes /> : <FaCheck />}
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(school)}
-                    className="btn btn-sm btn-danger"
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       ) : (
@@ -423,70 +445,80 @@ const SchoolList = () => {
                     </td>
                   </tr>
                 ) : (
-                  schools.map((school) => (
-                    <tr key={school.id}>
-                      <td>
-                        <div className="school-cell">
-                          <div className="school-logo-small">
-                            {school.logo ? (
-                              <img src={school.logo} alt={school.name} />
-                            ) : (
-                              <FaSchool />
-                            )}
+                  schools.map((school) => {
+                    const logoUrl = getImageUrl(school.logo);
+                    return (
+                      <tr key={school.id}>
+                        <td>
+                          <div className="school-cell">
+                            <div className="school-logo-small">
+                              {logoUrl ? (
+                                <img 
+                                  src={logoUrl} 
+                                  alt={school.name}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.parentElement.innerHTML = `<svg class="school-logo-small-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l11 6 11-6-11-6zm0 11.5L3.5 9.5 12 5l8.5 4.5L12 14.5z"/><path d="M12 22l-11-6v-2.5l11 6 11-6V16l-11 6z"/></svg>`;
+                                  }}
+                                />
+                              ) : (
+                                <FaSchool />
+                              )}
+                            </div>
+                            <div>
+                              <div className="school-name">{school.name}</div>
+                              <div className="school-id">ID: {school.school_id || school.id}</div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="school-name">{school.name}</div>
-                            <div className="school-id">ID: {school.school_id || school.id}</div>
+                        </td>
+                        <td>{school.region || '-'}</td>
+                        <td>{school.district || '-'}</td>
+                        <td>
+                          <span className={`level-badge ${getLevelBadgeClass(school.school_level)}`}>
+                            {getLevelDisplay(school.school_level)}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`status-badge ${getStatusBadgeClass(school.is_active)}`}>
+                            {school.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td>{school.student_count || 0}</td>
+                        <td>
+                          <div className="action-buttons">
+                            <Link 
+                              to={`/admin/schools/${school.id}`} 
+                              className="action-btn view-btn"
+                              title="View School"
+                            >
+                              <FaEye />
+                            </Link>
+                            <Link 
+                              to={`/admin/schools/${school.id}/edit`} 
+                              className="action-btn edit-btn"
+                              title="Edit School"
+                            >
+                              <FaEdit />
+                            </Link>
+                            <button 
+                              onClick={() => handleToggleStatus(school)}
+                              className={`action-btn ${school.is_active ? 'deactivate-btn' : 'activate-btn'}`}
+                              title={school.is_active ? 'Deactivate' : 'Activate'}
+                            >
+                              {school.is_active ? <FaTimes /> : <FaCheck />}
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(school)}
+                              className="action-btn delete-btn"
+                              title="Delete School"
+                            >
+                              <FaTrash />
+                            </button>
                           </div>
-                        </div>
-                      </td>
-                      <td>{school.region || '-'}</td>
-                      <td>{school.district || '-'}</td>
-                      <td>
-                        <span className={`level-badge ${getLevelBadgeClass(school.school_level)}`}>
-                          {getLevelDisplay(school.school_level)}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`status-badge ${getStatusBadgeClass(school.is_active)}`}>
-                          {school.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td>{school.student_count || 0}</td>
-                      <td>
-                        <div className="action-buttons">
-                          <Link 
-                            to={`/admin/schools/${school.id}`} 
-                            className="action-btn view-btn"
-                            title="View School"
-                          >
-                            <FaEye />
-                          </Link>
-                          <Link 
-                            to={`/admin/schools/${school.id}/edit`} 
-                            className="action-btn edit-btn"
-                            title="Edit School"
-                          >
-                            <FaEdit />
-                          </Link>
-                          <button 
-                            onClick={() => handleToggleStatus(school)}
-                            className={`action-btn ${school.is_active ? 'deactivate-btn' : 'activate-btn'}`}
-                            title={school.is_active ? 'Deactivate' : 'Activate'}
-                          >
-                            {school.is_active ? <FaTimes /> : <FaCheck />}
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(school)}
-                            className="action-btn delete-btn"
-                            title="Delete School"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
