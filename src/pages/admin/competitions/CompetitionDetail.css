@@ -1,0 +1,598 @@
+.competition-detail-page {
+  padding: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.detail-header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.detail-header .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-family);
+  text-decoration: none;
+}
+
+.detail-header .btn-secondary {
+  background: var(--medium-gray);
+  color: var(--text-dark);
+}
+
+.detail-header .btn-secondary:hover {
+  background: var(--dark-gray);
+  color: var(--white);
+}
+
+.detail-header .btn-primary {
+  background: var(--main-blue);
+  color: var(--white);
+}
+
+.detail-header .btn-primary:hover {
+  background: var(--dark-blue);
+}
+
+.detail-header .btn-success {
+  background: var(--accent-green);
+  color: var(--white);
+}
+
+.detail-header .btn-success:hover {
+  background: #14693A;
+}
+
+.detail-header .btn-danger {
+  background: var(--accent-red);
+  color: var(--white);
+}
+
+.detail-header .btn-danger:hover {
+  background: #B71C1C;
+}
+
+.detail-header .btn-outline {
+  background: transparent;
+  color: var(--main-blue);
+  border: 2px solid var(--main-blue);
+}
+
+.detail-header .btn-outline:hover {
+  background: var(--main-blue);
+  color: var(--white);
+}
+
+/* Competition Detail Card */
+.competition-detail-card {
+  margin-bottom: 24px;
+  padding: 24px;
+}
+
+.competition-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.competition-detail-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: var(--light-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: var(--main-blue);
+  flex-shrink: 0;
+}
+
+.competition-detail-info {
+  flex: 1;
+}
+
+.competition-detail-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 8px 0;
+}
+
+.competition-detail-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.detail-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.detail-meta-item svg {
+  color: var(--main-blue);
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-draft {
+  background: var(--medium-gray);
+  color: var(--text-light);
+}
+
+.status-open {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3B82F6;
+}
+
+.status-closed {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.status-ongoing {
+  background: rgba(245, 158, 11, 0.1);
+  color: #F59E0B;
+}
+
+.status-completed {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+/* Registration Open Banner */
+.registration-open-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-top: 12px;
+}
+
+/* Details Grid */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.detail-card {
+  padding: 24px;
+}
+
+.detail-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 16px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.detail-item:not(:last-child) {
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.detail-icon {
+  font-size: 18px;
+  color: var(--main-blue);
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 24px;
+}
+
+.detail-item label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-light);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.detail-item p {
+  margin: 2px 0 0 0;
+  font-size: 15px;
+  color: var(--text-dark);
+}
+
+/* Status Actions */
+.status-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-actions .btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-family);
+  text-align: left;
+}
+
+.status-actions .btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.status-actions .btn-primary {
+  background: var(--main-blue);
+  color: var(--white);
+}
+
+.status-actions .btn-primary:hover:not(:disabled) {
+  background: var(--dark-blue);
+}
+
+.status-actions .btn-outline {
+  background: transparent;
+  color: var(--text-dark);
+  border: 1px solid var(--medium-gray);
+}
+
+.status-actions .btn-outline:hover:not(:disabled) {
+  background: var(--light-gray);
+}
+
+.status-actions .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Participations */
+.participations-card {
+  padding: 24px;
+}
+
+.participations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.participations-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.participations-count {
+  font-size: 14px;
+  color: var(--text-light);
+  background: var(--light-gray);
+  padding: 2px 12px;
+  border-radius: 12px;
+}
+
+.participations-table-wrap {
+  overflow-x: auto;
+}
+
+.participations-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.participations-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-dark);
+  background: var(--light-gray);
+  border-bottom: 2px solid var(--medium-gray);
+}
+
+.participations-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--medium-gray);
+  color: var(--text-dark);
+  vertical-align: middle;
+}
+
+.participations-table tbody tr:hover {
+  background: rgba(27, 77, 139, 0.03);
+}
+
+.school-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.school-icon {
+  color: var(--main-blue);
+  font-size: 16px;
+}
+
+.participation-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.participation-pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #F59E0B;
+}
+
+.participation-approved {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.participation-rejected {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.participation-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  background: transparent;
+  text-decoration: none;
+}
+
+.action-btn:hover {
+  transform: scale(1.1);
+}
+
+.approve-btn {
+  color: #10B981;
+}
+
+.approve-btn:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.reject-btn {
+  color: #EF4444;
+}
+
+.reject-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.view-btn {
+  color: var(--main-blue);
+}
+
+.view-btn:hover {
+  background: rgba(27, 77, 139, 0.1);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: var(--text-light);
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  color: var(--text-light);
+  font-size: 15px;
+  margin: 0;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: var(--white);
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text-dark);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-light);
+  padding: 4px;
+}
+
+.modal-close:hover {
+  color: var(--text-dark);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-body p {
+  margin: 8px 0;
+  color: var(--text-dark);
+  font-size: 15px;
+}
+
+.modal-warning {
+  color: var(--accent-red) !important;
+  font-size: 14px !important;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--medium-gray);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Competition Detail Error */
+.competition-detail-error {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.competition-detail-error h2 {
+  color: var(--text-dark);
+  margin: 0 0 16px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .competition-detail-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .competition-detail-meta {
+    justify-content: center;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .detail-header-actions {
+    justify-content: center;
+  }
+
+  .detail-header .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .participations-table {
+    font-size: 13px;
+  }
+
+  .participations-table th,
+  .participations-table td {
+    padding: 8px 10px;
+  }
+
+  .status-actions {
+    flex-direction: column;
+  }
+
+  .status-actions .btn {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .competition-detail-name {
+    font-size: 20px;
+  }
+
+  .detail-card {
+    padding: 16px;
+  }
+
+  .participations-card {
+    padding: 16px;
+  }
+
+  .participation-actions {
+    flex-wrap: wrap;
+  }
+}

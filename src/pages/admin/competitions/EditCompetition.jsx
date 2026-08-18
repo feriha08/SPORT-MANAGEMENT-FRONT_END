@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { 
   FaArrowLeft, FaSave, FaTrophy, FaCalendarAlt, 
   FaUsers, FaFutbol, FaVenusMars, FaClock,
-  FaPlus, FaTimes
+  FaTrash, FaSync
 } from 'react-icons/fa';
 import axiosInstance from '../../../api/axios';
 import Card from '../../../components/common/Card';
@@ -29,27 +29,31 @@ const competitionSchema = yup.object({
   description: yup.string(),
 });
 
-const CreateCompetition = () => {
-  const [loading, setLoading] = useState(false);
-  const [sports, setSports] = useState([]);
-  const [fetchingSports, setFetchingSports] = useState(true);
+const EditCompetition = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [fetchingData, setFetchingData] = useState(true);
+  const [competitionData, setCompetitionData] = useState(null);
+  const [sports, setSports] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(competitionSchema),
     defaultValues: {
       name: '',
       sport: '',
-      season: new Date().getFullYear().toString(),
-      gender: 'mixed',  // lowercase
-      max_age: 18,
+      season: '',
+      gender: '',
+      max_age: '',
       registration_deadline: '',
-      status: 'draft',  // lowercase
+      status: '',
       description: '',
     },
   });
@@ -57,35 +61,49 @@ const CreateCompetition = () => {
   const selectedStatus = watch('status');
 
   useEffect(() => {
-    fetchSports();
-  }, []);
+    fetchData();
+  }, [id]);
 
-  const fetchSports = async () => {
+  const fetchData = async () => {
     try {
-      const response = await axiosInstance.get('sports/');
-      console.log('Sports response:', response.data);
-      setSports(response.data.results || response.data || []);
-    } catch (error) {
-      console.error('Error fetching sports:', error);
-      // Sample sports if API fails
-      setSports([
-        { id: 1, name: 'Football' },
-        { id: 2, name: 'Netball' },
-        { id: 3, name: 'Volleyball' },
-        { id: 4, name: 'Basketball' },
-        { id: 5, name: 'Athletics' },
-        { id: 6, name: 'Rugby' },
-        { id: 7, name: 'Swimming' },
+      const [compRes, sportsRes] = await Promise.all([
+        axiosInstance.get(`competitions/${id}/`),
+        axiosInstance.get('sports/')
       ]);
+      
+      const competition = compRes.data;
+      setCompetitionData(competition);
+      
+      // Set form values
+      setValue('name', competition.name || '');
+      setValue('season', competition.season || '');
+      setValue('gender', competition.gender || 'mixed');
+      setValue('max_age', competition.max_age || 18);
+      setValue('registration_deadline', competition.registration_deadline || '');
+      setValue('status', competition.status || 'draft');
+      setValue('description', competition.description || '');
+      
+      // Find sport name from ID
+      const sportsList = sportsRes.data.results || sportsRes.data || [];
+      const sportObj = sportsList.find(s => s.id === competition.sport);
+      if (sportObj) {
+        setValue('sport', sportObj.name);
+      }
+      
+      setSports(sportsList);
+    } catch (error) {
+      console.error('Error fetching competition:', error);
+      toast.error('Failed to load competition data');
+      navigate('/admin/competitions');
     } finally {
-      setFetchingSports(false);
+      setFetchingData(false);
     }
   };
 
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      // IMPORTANT: Map sport name to ID
+      // Map sport name to ID
       const selectedSport = sports.find(s => s.name === data.sport);
       if (!selectedSport) {
         toast.error('Please select a valid sport');
@@ -93,64 +111,113 @@ const CreateCompetition = () => {
         return;
       }
 
-      const payload = {
-        name: data.name,
-        sport: selectedSport.id,  // Send ID, not name
-        season: data.season,
-        gender: data.gender.toLowerCase(),  // lowercase
-        max_age: parseInt(data.max_age),
-        registration_deadline: data.registration_deadline,
-        status: data.status.toLowerCase(),  // lowercase
-        description: data.description || '',
-      };
-
-      console.log('📤 Creating competition with payload:', payload);
-
-      const response = await axiosInstance.post('competitions/create/', payload);
+      // Build payload with only changed fields
+      const payload = {};
       
-      console.log('✅ Competition created:', response.data);
-      toast.success('🎉 Competition created successfully!');
+      if (data.name !== competitionData.name) {
+        payload.name = data.name;
+      }
+      
+      if (selectedSport.id !== competitionData.sport) {
+        payload.sport = selectedSport.id;
+      }
+      
+      if (data.season !== competitionData.season) {
+        payload.season = data.season;
+      }
+      
+      const genderLower = data.gender.toLowerCase();
+      if (genderLower !== competitionData.gender) {
+        payload.gender = genderLower;
+      }
+      
+      const maxAge = parseInt(data.max_age);
+      if (maxAge !== competitionData.max_age) {
+        payload.max_age = maxAge;
+      }
+      
+      if (data.registration_deadline !== competitionData.registration_deadline) {
+        payload.registration_deadline = data.registration_deadline;
+      }
+      
+      const statusLower = data.status.toLowerCase();
+      if (statusLower !== competitionData.status) {
+        payload.status = statusLower;
+      }
+      
+      if (data.description !== (competitionData.description || '')) {
+        payload.description = data.description;
+      }
+
+      // If no changes, show message
+      if (Object.keys(payload).length === 0) {
+        toast.info('No changes detected');
+        setLoading(false);
+        return;
+      }
+
+      console.log('📤 Updating competition with payload:', payload);
+
+      const response = await axiosInstance.put(`competitions/${id}/manage/`, payload);
+      
+      console.log('✅ Competition updated:', response.data);
+      toast.success('🎉 Competition updated successfully!');
       
       setTimeout(() => {
         navigate('/admin/competitions');
       }, 1500);
     } catch (error) {
-      console.error('❌ Error creating competition:', error);
+      console.error('❌ Error updating competition:', error);
       
       if (error.response) {
         const errorData = error.response.data;
-        console.log('Error data:', errorData);
-        
-        let errorMessage = 'Failed to create competition. ';
+        let errorMessage = 'Failed to update competition. ';
         
         if (typeof errorData === 'object') {
-          const errors = [];
-          for (const [field, messages] of Object.entries(errorData)) {
-            if (Array.isArray(messages)) {
-              errors.push(`${field}: ${messages.join(', ')}`);
-            } else if (typeof messages === 'string') {
-              errors.push(`${field}: ${messages}`);
-            } else if (typeof messages === 'object') {
-              for (const [subField, subMessages] of Object.entries(messages)) {
-                if (Array.isArray(subMessages)) {
-                  errors.push(`${field}.${subField}: ${subMessages.join(', ')}`);
-                }
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          } else {
+            const errors = [];
+            for (const [field, messages] of Object.entries(errorData)) {
+              if (Array.isArray(messages)) {
+                errors.push(`${field}: ${messages.join(', ')}`);
+              } else if (typeof messages === 'string') {
+                errors.push(`${field}: ${messages}`);
               }
             }
-          }
-          if (errors.length > 0) {
-            errorMessage = errors.join('\n');
+            if (errors.length > 0) {
+              errorMessage = errors.join('\n');
+            }
           }
         }
         toast.error(errorMessage);
-      } else if (error.request) {
-        toast.error('Cannot connect to server. Please check if backend is running.');
       } else {
-        toast.error('An error occurred. Please try again.');
+        toast.error('Failed to update competition. Please try again.');
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await axiosInstance.delete(`competitions/${id}/manage/`);
+      toast.success('Competition deleted successfully');
+      setShowDeleteModal(false);
+      navigate('/admin/competitions');
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Failed to delete competition');
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchData();
+    toast.info('Data refreshed');
   };
 
   const getStatusColor = (status) => {
@@ -164,14 +231,25 @@ const CreateCompetition = () => {
     return colors[status] || '#6B7280';
   };
 
-  // Gender options with lowercase values
+  const getStatusLabel = (status) => {
+    const labels = {
+      'draft': '📝 Draft',
+      'open': '🔓 Open',
+      'closed': '🔒 Closed',
+      'ongoing': '🔄 Ongoing',
+      'completed': '✅ Completed'
+    };
+    return labels[status] || status;
+  };
+
+  // Gender options
   const genderOptions = [
     { value: 'male', label: 'Male' },
     { value: 'female', label: 'Female' },
     { value: 'mixed', label: 'Mixed' }
   ];
 
-  // Status options with lowercase values
+  // Status options
   const statusOptions = [
     { value: 'draft', label: '📝 Draft' },
     { value: 'open', label: '🔓 Open' },
@@ -180,20 +258,41 @@ const CreateCompetition = () => {
     { value: 'completed', label: '✅ Completed' }
   ];
 
-  if (fetchingSports) {
+  if (fetchingData) {
     return <LoadingSpinner fullPage />;
   }
 
   return (
     <div className="competition-form-page">
       <div className="form-header">
-        <Link to="/admin/competitions" className="btn btn-secondary">
+        <Link to={`/admin/competitions/${id}`} className="btn btn-secondary">
           <FaArrowLeft /> Back
         </Link>
         <div className="form-header-right">
-          <h1 className="form-title">Create Competition</h1>
-          <p className="form-subtitle">Set up a new sports competition</p>
+          <h1 className="form-title">Edit Competition</h1>
+          <p className="form-subtitle">Update competition details</p>
         </div>
+        <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+          <button onClick={handleRefresh} className="btn btn-secondary" title="Refresh data">
+            <FaSync /> Refresh
+          </button>
+          <button onClick={handleDelete} className="btn btn-danger">
+            <FaTrash /> Delete
+          </button>
+        </div>
+      </div>
+
+      {/* Status Badge */}
+      <div className="status-badge-container">
+        <span 
+          className="status-badge-large" 
+          style={{ 
+            backgroundColor: getStatusColor(selectedStatus || competitionData?.status),
+            color: '#FFFFFF'
+          }}
+        >
+          Status: {getStatusLabel(selectedStatus || competitionData?.status)}
+        </span>
       </div>
 
       <Card className="form-card">
@@ -381,7 +480,7 @@ const CreateCompetition = () => {
           </div>
 
           <div className="form-actions">
-            <Link to="/admin/competitions" className="btn btn-secondary">
+            <Link to={`/admin/competitions/${id}`} className="btn btn-secondary">
               Cancel
             </Link>
             <button
@@ -392,19 +491,43 @@ const CreateCompetition = () => {
               {loading ? (
                 <>
                   <span className="spinner"></span>
-                  Creating...
+                  Updating...
                 </>
               ) : (
                 <>
-                  <FaSave /> Create Competition
+                  <FaSave /> Update Competition
                 </>
               )}
             </button>
           </div>
         </form>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Delete Competition</h3>
+              <button className="modal-close" onClick={() => setShowDeleteModal(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete <strong>{competitionData?.name}</strong>?</p>
+              <p className="modal-warning">This action cannot be undone. All associated data will be deleted.</p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowDeleteModal(false)}>
+                Cancel
+              </button>
+              <button className="btn btn-danger" onClick={confirmDelete}>
+                Delete Competition
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default CreateCompetition;
+export default EditCompetition;

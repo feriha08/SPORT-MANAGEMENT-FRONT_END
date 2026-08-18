@@ -31,6 +31,9 @@ import PublicDashboard from './pages/public/Home';
 import SchoolDetail from './pages/admin/schools/SchoolDetail';
 import StudentDetail from './pages/admin/students/StudentDetail';
 import EditStudent from './pages/admin/students/EditStudent';
+import CompetitionDetail from './pages/admin/competitions/CompetitionDetail';
+import EditCompetition from './pages/admin/competitions/EditCompetition';
+import CompetitionManage from './pages/admin/competitions/CompetitionManage';
 import './index.css';
 
 function App() {
@@ -84,13 +87,42 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          
+          <Route 
+            path="/admin/competitions/:id/manage" 
+            element={
+              <ProtectedRoute allowedRoles={['Super Admin']}>
+                <DashboardLayout>
+                  <CompetitionManage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="/admin/schools/:id" 
             element={
               <ProtectedRoute allowedRoles={['Super Admin']}>
                 <DashboardLayout>
                   <SchoolDetail />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/competitions/:id" 
+            element={
+              <ProtectedRoute allowedRoles={['Super Admin']}>
+                <DashboardLayout>
+                  <CompetitionDetail />
+                </DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/competitions/:id/edit" 
+            element={
+              <ProtectedRoute allowedRoles={['Super Admin']}>
+                <DashboardLayout>
+                  <EditCompetition />
                 </DashboardLayout>
               </ProtectedRoute>
             } 
