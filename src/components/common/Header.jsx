@@ -36,10 +36,6 @@ const Header = ({ toggleSidebar }) => {
       </div>
 
       <div className="header-right">
-        <button className="header-notification">
-          <FaBell />
-          <span className="notification-badge">3</span>
-        </button>
 
         <div className="header-user">
           <button 
