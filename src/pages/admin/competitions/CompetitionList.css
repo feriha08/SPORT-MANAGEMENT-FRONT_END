@@ -1,12 +1,183 @@
+/* Competition List Styles */
 .competition-list-page {
   padding: 0;
+}
+
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.page-subtitle {
+  color: var(--text-light);
+  margin: 4px 0 0 0;
+  font-size: 15px;
+}
+
+/* Header Actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.header-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.header-actions .btn-primary {
+  background: #1B4D8B;
+  color: #FFFFFF;
+}
+
+.header-actions .btn-primary:hover {
+  background: #0D2B4B;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(27, 77, 139, 0.3);
+}
+
+.header-actions .btn-secondary {
+  background: #E8ECF1;
+  color: #1A1A2E;
+  border: 1px solid #D1D5DB;
+}
+
+.header-actions .btn-secondary:hover {
+  background: #D1D5DB;
+  transform: translateY(-2px);
+}
+
+/* Filters */
+.filters-card {
+  margin-bottom: 20px;
+}
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.search-form {
+  flex: 1;
+  min-width: 250px;
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--white);
+  border: 2px solid var(--medium-gray);
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+  overflow: hidden;
+}
+
+.search-wrapper:focus-within {
+  border-color: var(--main-blue);
+  box-shadow: 0 0 0 3px rgba(27, 77, 139, 0.1);
+}
+
+.search-icon {
+  padding: 0 12px;
+  color: var(--text-light);
+  font-size: 16px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  font-family: var(--font-family);
+  background: transparent;
+  color: var(--text-dark);
+}
+
+.search-btn {
+  border-radius: 0;
+  padding: 10px 20px;
+  height: 100%;
+  background: #1B4D8B;
+  color: #FFFFFF;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.search-btn:hover {
+  background: #0D2B4B;
+}
+
+.filter-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-item label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dark);
+  white-space: nowrap;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 2px solid var(--medium-gray);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-family);
+  background: var(--white);
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--main-blue);
 }
 
 /* Stats Summary */
 .stats-summary {
   display: flex;
   gap: 24px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   padding: 16px 20px;
   background: var(--white);
   border-radius: 8px;
@@ -207,6 +378,7 @@
   font-weight: 500;
 }
 
+/* ===== COMPETITION CARD FOOTER - FIXED ===== */
 .competition-card-footer {
   display: flex;
   gap: 8px;
@@ -217,36 +389,316 @@
 
 .competition-card-footer .btn {
   flex: 1;
-  padding: 6px 12px;
-  font-size: 13px;
+  padding: 6px 10px;
+  font-size: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-weight: 500;
+  min-width: 0;
 }
 
-.btn-info {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3B82F6;
+/* View Button - Blue */
+.competition-card-footer .btn-primary {
+  background: #1B4D8B;
+  color: #FFFFFF;
 }
 
-.btn-info:hover {
-  background: #3B82F6;
+.competition-card-footer .btn-primary:hover {
+  background: #0D2B4B;
+  transform: translateY(-2px);
+}
+
+/* Edit Button - Gray */
+.competition-card-footer .btn-secondary {
+  background: #E8ECF1;
+  color: #1A1A2E;
+  border: 1px solid #D1D5DB;
+}
+
+.competition-card-footer .btn-secondary:hover {
+  background: #D1D5DB;
+  transform: translateY(-2px);
+}
+
+/* Manage Button - Info Blue */
+.competition-card-footer .btn-info {
+  background: #DBEAFE;
+  color: #1D4ED8;
+  border: 1px solid #93C5FD;
+}
+
+.competition-card-footer .btn-info:hover {
+  background: #BFDBFE;
+  transform: translateY(-2px);
+}
+
+/* Delete Button - Red */
+.competition-card-footer .btn-danger {
+  background: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FCA5A5;
+}
+
+.competition-card-footer .btn-danger:hover {
+  background: #FECACA;
+  transform: translateY(-2px);
+}
+
+/* ===== END COMPETITION CARD FOOTER ===== */
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 0;
+}
+
+.pagination-btn {
+  padding: 8px 14px;
+  border: 2px solid var(--medium-gray);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--text-dark);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-family);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagination-btn:hover:not(:disabled):not(.active) {
+  border-color: var(--main-blue);
+  color: var(--main-blue);
+}
+
+.pagination-btn.active {
+  background: var(--main-blue);
+  border-color: var(--main-blue);
   color: var(--white);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: var(--white);
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text-dark);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-light);
+  padding: 4px;
+}
+
+.modal-close:hover {
+  color: var(--text-dark);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-body p {
+  margin: 8px 0;
+  color: var(--text-dark);
+  font-size: 15px;
+}
+
+.modal-warning {
+  color: var(--accent-red) !important;
+  font-size: 14px !important;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--medium-gray);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-footer .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.modal-footer .btn-secondary {
+  background: var(--medium-gray);
+  color: var(--text-dark);
+}
+
+.modal-footer .btn-secondary:hover {
+  background: var(--dark-gray);
+  color: var(--white);
+}
+
+.modal-footer .btn-danger {
+  background: var(--accent-red);
+  color: var(--white);
+}
+
+.modal-footer .btn-danger:hover {
+  background: #B71C1C;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  grid-column: 1 / -1;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  color: var(--text-dark);
+  margin: 0 0 8px 0;
+}
+
+.empty-state p {
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive */
 @media (max-width: 992px) {
-  .competitions-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
   .filters-container {
     flex-direction: column;
+    align-items: stretch;
   }
   
   .search-form {
     min-width: unset;
   }
   
+  .filter-group {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-actions {
+    flex-wrap: wrap;
+  }
+  
+  .header-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .competitions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-summary {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .stat-item {
+    flex: 1;
+    min-width: calc(50% - 12px);
+  }
+  
+  .competition-card-footer {
+    flex-wrap: wrap;
+  }
+  
+  .competition-card-footer .btn {
+    flex: 1;
+    min-width: calc(50% - 4px);
+  }
+}
+
+@media (max-width: 480px) {
   .filter-group {
     flex-direction: column;
   }
@@ -259,27 +711,7 @@
     flex: 1;
   }
   
-  .competitions-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .stats-summary {
-    gap: 12px;
-  }
-  
-  .stat-item {
-    flex: 1;
-    min-width: calc(50% - 12px);
-  }
-}
-
-@media (max-width: 480px) {
-  .competition-card-footer {
-    flex-wrap: wrap;
-  }
-  
   .competition-card-footer .btn {
-    flex: 1;
-    min-width: calc(50% - 4px);
+    min-width: 100%;
   }
 }

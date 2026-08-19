@@ -28,21 +28,25 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const getNavItems = () => {
     const role = user?.role || 'public_user';
     
+    // SUPER ADMIN
     if (role === 'Super Admin' || role === 'super_admin') {
       return [
         { path: '/admin/dashboard', icon: <FaHome />, label: 'Dashboard' },
         { path: '/admin/users', icon: <FaUsers />, label: 'Users' },
-        { path: '/admin/users/create', icon: <FaUserPlus />, label: 'Create User' },
+        // REMOVED: Create User - is available as button in Users page
         { path: '/admin/schools', icon: <FaSchool />, label: 'Schools' },
         { path: '/admin/students', icon: <FaUserGraduate />, label: 'Students' },
         { path: '/admin/competitions', icon: <FaTrophy />, label: 'Competitions' },
-        { path: '/admin/competitions/create', icon: <FaPlus />, label: 'Create Competition' },
+        // REMOVED: Create Competition - is available as button in Competitions page
         { path: '/admin/fixtures', icon: <FaCalendarAlt />, label: 'Fixtures' },
         { path: '/admin/matches', icon: <FaFutbol />, label: 'Matches' },
         { path: '/admin/reports', icon: <FaFileAlt />, label: 'Reports' },
         { path: '/admin/settings', icon: <FaCog />, label: 'Settings' },
       ];
-    } else if (role === 'School Admin' || role === 'school_admin') {
+    } 
+    
+    // SCHOOL ADMIN
+    else if (role === 'School Admin' || role === 'school_admin') {
       return [
         { path: '/school/dashboard', icon: <FaHome />, label: 'Dashboard' },
         { path: '/school/register', icon: <FaPlus />, label: 'Register School' },
@@ -54,7 +58,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { path: '/school/matches', icon: <FaFutbol />, label: 'Matches' },
         { path: '/school/reports', icon: <FaFileAlt />, label: 'Reports' },
       ];
-    } else if (role === 'Referee' || role === 'referee') {
+    } 
+    
+    // REFEREE
+    else if (role === 'Referee' || role === 'referee') {
       return [
         { path: '/referee/dashboard', icon: <FaHome />, label: 'Dashboard' },
         { path: '/referee/matches', icon: <FaFutbol />, label: 'My Matches' },
@@ -62,7 +69,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { path: '/referee/profile', icon: <FaUserCog />, label: 'Profile' },
       ];
     }
-    return [];
+    
+    // PUBLIC USER or default
+    return [
+      { path: '/', icon: <FaHome />, label: 'Home' },
+      { path: '/competitions', icon: <FaTrophy />, label: 'Competitions' },
+      { path: '/schools', icon: <FaSchool />, label: 'Schools' },
+    ];
   };
 
   const navItems = getNavItems();

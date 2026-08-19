@@ -5,7 +5,8 @@ import {
   FaUser, FaEnvelope, FaLock, FaBell, 
   FaPalette, FaGlobe, FaSave, FaEdit,
   FaCheckCircle, FaMoon, FaSun, FaLanguage,
-  FaShieldAlt, FaUserCog
+  FaShieldAlt, FaUserCog, FaPhone, FaCamera,
+  FaImage, FaTrash
 } from 'react-icons/fa';
 import axiosInstance from '../../../api/axios';
 import Card from '../../../components/common/Card';
@@ -37,6 +38,8 @@ const Settings = () => {
     theme: 'light',
     sidebar_collapsed: false
   });
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [profilePreview, setProfilePreview] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -46,65 +49,184 @@ const Settings = () => {
         phone_number: user.phone_number || '',
         username: user.username || ''
       });
+      if (user.profile_picture) {
+        setProfilePreview(user.profile_picture);
+      }
     }
   }, [user]);
 
+  // ===== PROFILE UPDATE =====
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axiosInstance.put('accounts/me/', {
+      // Use the user update endpoint directly
+      const response = await axiosInstance.put(`accounts/${user.id}/`, {
         full_name: profileData.full_name,
         email: profileData.email,
-        phone_number: profileData.phone_number
+        phone_number: profileData.phone_number || '',
       });
+      
       toast.success('Profile updated successfully!');
-      console.log('Profile updated:', response.data);
+      // Update user data in auth context
+      const updatedUser = { ...user, ...response.data };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error('Profile update error:', error);
-      toast.error('Failed to update profile');
+      
+      if (error.response) {
+        const errorData = error.response.data;
+        let errorMessage = 'Failed to update profile. ';
+        
+        if (typeof errorData === 'object') {
+          const errors = [];
+          for (const [field, messages] of Object.entries(errorData)) {
+            if (Array.isArray(messages)) {
+              errors.push(`${field}: ${messages.join(', ')}`);
+            } else if (typeof messages === 'string') {
+              errors.push(`${field}: ${messages}`);
+            }
+          }
+          if (errors.length > 0) {
+            errorMessage = errors.join('\n');
+          }
+        }
+        toast.error(errorMessage);
+      } else {
+        toast.error('Failed to update profile');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
+  // ===== PROFILE PICTURE UPDATE =====
+  const handleProfilePictureUpdate = async () => {
+    if (!profilePicture) return;
     
-    if (passwordData.new_password !== passwordData.confirm_password) {
-      toast.error('Passwords do not match');
-      return;
-    }
-
-    if (passwordData.new_password.length < 8) {
-      toast.error('Password must be at least 8 characters');
-      return;
-    }
-
     setLoading(true);
     try {
-      await axiosInstance.post('accounts/change-password/', {
-        old_password: passwordData.current_password,
-        new_password: passwordData.new_password
+      const formData = new FormData();
+      formData.append('profile_picture', profilePicture);
+      
+      const response = await axiosInstance.put(`accounts/${user.id}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      toast.success('Password changed successfully!');
-      setPasswordData({
-        current_password: '',
-        new_password: '',
-        confirm_password: ''
-      });
+      
+      toast.success('Profile picture updated successfully!');
+      if (response.data?.profile_picture) {
+        setProfilePreview(response.data.profile_picture);
+      }
+      setProfilePicture(null);
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
-      console.error('Password change error:', error);
-      toast.error(error.response?.data?.detail || 'Failed to change password');
+      console.error('Profile picture update error:', error);
+      toast.error(error.response?.data?.detail || 'Failed to update profile picture');
     } finally {
       setLoading(false);
     }
   };
 
+// ===== PASSWORD CHANGE =====
+const handlePasswordChange = async (e) => {
+  e.preventDefault();
+  
+  if (!passwordData.current_password) {
+    toast.error('Current password is required');
+    return;
+  }
+  
+  if (!passwordData.new_password) {
+    toast.error('New password is required');
+    return;
+  }
+
+  if (passwordData.new_password !== passwordData.confirm_password) {
+    toast.error('Passwords do not match');
+    return;
+  }
+
+  if (passwordData.new_password.length < 8) {
+    toast.error('Password must be at least 8 characters');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    // Use the new change-password endpoint
+    const response = await axiosInstance.post('accounts/change-password/', {
+      old_password: passwordData.current_password,
+      new_password: passwordData.new_password
+    });
+    
+    toast.success('Password changed successfully!');
+    setPasswordData({
+      current_password: '',
+      new_password: '',
+      confirm_password: ''
+    });
+    
+    // Logout and redirect to login
+    setTimeout(() => {
+      toast.info('Please login again with your new password');
+      logout();
+      window.location.href = '/login';
+    }, 1500);
+    
+  } catch (error) {
+    console.error('Password change error:', error);
+    
+    if (error.response) {
+      const errorData = error.response.data;
+      let errorMessage = 'Failed to change password. ';
+      
+      if (typeof errorData === 'object') {
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        } else if (errorData.detail) {
+          errorMessage = errorData.detail;
+        } else if (errorData.old_password) {
+          errorMessage = `Current password: ${errorData.old_password.join(', ')}`;
+        } else if (errorData.new_password) {
+          errorMessage = `New password: ${errorData.new_password.join(', ')}`;
+        } else if (errorData.non_field_errors) {
+          errorMessage = errorData.non_field_errors.join(', ');
+        } else {
+          const errors = [];
+          for (const [field, messages] of Object.entries(errorData)) {
+            if (Array.isArray(messages)) {
+              errors.push(`${field}: ${messages.join(', ')}`);
+            } else if (typeof messages === 'string') {
+              errors.push(`${field}: ${messages}`);
+            }
+          }
+          if (errors.length > 0) {
+            errorMessage = errors.join('\n');
+          }
+        }
+      }
+      toast.error(errorMessage);
+    } else {
+      toast.error('Failed to change password. Please try again.');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+  // ===== NOTIFICATION SETTINGS =====
   const handleNotificationUpdate = async () => {
     setLoading(true);
     try {
-      // API call to update notification settings
+      localStorage.setItem('notification_settings', JSON.stringify(notificationSettings));
       toast.success('Notification settings updated!');
     } catch (error) {
       toast.error('Failed to update notification settings');
@@ -113,10 +235,18 @@ const Settings = () => {
     }
   };
 
+  // ===== THEME SETTINGS =====
   const handleThemeUpdate = async () => {
     setLoading(true);
     try {
-      // API call to update theme settings
+      localStorage.setItem('theme_settings', JSON.stringify(themeSettings));
+      
+      if (themeSettings.theme === 'dark') {
+        document.body.classList.add('dark-theme');
+      } else {
+        document.body.classList.remove('dark-theme');
+      }
+      
       toast.success('Theme updated successfully!');
     } catch (error) {
       toast.error('Failed to update theme');
@@ -124,6 +254,45 @@ const Settings = () => {
       setLoading(false);
     }
   };
+
+  // ===== PROFILE PICTURE HANDLERS =====
+  const handleProfilePictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfilePicture(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeProfilePicture = () => {
+    setProfilePicture(null);
+    setProfilePreview(null);
+  };
+
+  // ===== LOAD SAVED SETTINGS =====
+  useEffect(() => {
+    const savedNotifications = localStorage.getItem('notification_settings');
+    if (savedNotifications) {
+      try {
+        setNotificationSettings(JSON.parse(savedNotifications));
+      } catch (e) {}
+    }
+    
+    const savedTheme = localStorage.getItem('theme_settings');
+    if (savedTheme) {
+      try {
+        const theme = JSON.parse(savedTheme);
+        setThemeSettings(theme);
+        if (theme.theme === 'dark') {
+          document.body.classList.add('dark-theme');
+        }
+      } catch (e) {}
+    }
+  }, []);
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: <FaUser /> },
@@ -151,7 +320,11 @@ const Settings = () => {
         <div className="settings-sidebar">
           <div className="settings-user">
             <div className="settings-avatar">
-              {user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+              {profilePreview ? (
+                <img src={profilePreview} alt="Profile" />
+              ) : (
+                <span>{user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}</span>
+              )}
             </div>
             <div className="settings-user-info">
               <p className="settings-user-name">{user?.full_name || user?.username}</p>
@@ -192,6 +365,52 @@ const Settings = () => {
               </p>
 
               <form onSubmit={handleProfileUpdate} className="settings-form">
+                {/* Profile Picture */}
+                <div className="form-group">
+                  <label>Profile Picture</label>
+                  <div className="profile-picture-upload">
+                    <div className="profile-picture-preview">
+                      {profilePreview ? (
+                        <img src={profilePreview} alt="Profile" />
+                      ) : (
+                        <div className="profile-picture-placeholder">
+                          <FaUser />
+                        </div>
+                      )}
+                    </div>
+                    <div className="profile-picture-actions">
+                      <label className="btn btn-secondary btn-sm">
+                        <FaCamera /> Upload
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleProfilePictureChange}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                      {profilePreview && (
+                        <button 
+                          type="button" 
+                          className="btn btn-danger btn-sm"
+                          onClick={removeProfilePicture}
+                        >
+                          <FaTrash /> Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {profilePicture && (
+                    <button 
+                      type="button" 
+                      className="btn btn-primary btn-sm"
+                      onClick={handleProfilePictureUpdate}
+                      style={{ marginTop: '10px' }}
+                    >
+                      <FaSave /> Save Profile Picture
+                    </button>
+                  )}
+                </div>
+
                 <div className="form-group">
                   <label>Full Name</label>
                   <div className="input-wrapper">
@@ -237,7 +456,7 @@ const Settings = () => {
                 <div className="form-group">
                   <label>Phone Number</label>
                   <div className="input-wrapper">
-                    <FaEnvelope className="input-icon" />
+                    <FaPhone className="input-icon" />
                     <input
                       type="tel"
                       value={profileData.phone_number}
@@ -537,7 +756,7 @@ const Settings = () => {
                     <FaGlobe className="input-icon" />
                     <input
                       type="text"
-                      value="SS&MS"
+                      value="SS&MS - Sports School & Management System"
                       className="form-control"
                       disabled
                     />
@@ -548,7 +767,7 @@ const Settings = () => {
                   <label>Default Language</label>
                   <div className="input-wrapper">
                     <FaLanguage className="input-icon" />
-                    <select className="form-control">
+                    <select className="form-control" defaultValue="en">
                       <option value="en">English</option>
                       <option value="sw">Swahili</option>
                     </select>
@@ -559,7 +778,7 @@ const Settings = () => {
                   <label>Time Zone</label>
                   <div className="input-wrapper">
                     <FaGlobe className="input-icon" />
-                    <select className="form-control">
+                    <select className="form-control" defaultValue="Africa/Dar_es_Salaam">
                       <option value="Africa/Dar_es_Salaam">Africa/Dar_es_Salaam</option>
                       <option value="Africa/Nairobi">Africa/Nairobi</option>
                       <option value="UTC">UTC</option>

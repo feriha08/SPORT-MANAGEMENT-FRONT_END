@@ -20,15 +20,14 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const response = await axiosInstance.get('accounts/me/');
-      console.log('Fetched user:', response.data);
       setUser(response.data);
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Failed to fetch user:', error);
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      setUser(null);
-      setIsAuthenticated(false);
+      // If token is invalid, logout
+      if (error.response?.status === 401) {
+        logout();
+      }
     } finally {
       setLoading(false);
     }
@@ -36,6 +35,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
+      // Clear old tokens first
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      
       const response = await axiosInstance.post('token/', { 
         username, 
         password 
@@ -45,7 +48,6 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('refresh_token', response.data.refresh);
       
       const userResponse = await axiosInstance.get('accounts/me/');
-      console.log('Login user data:', userResponse.data);
       setUser(userResponse.data);
       setIsAuthenticated(true);
       
@@ -65,6 +67,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
     setUser(null);
     setIsAuthenticated(false);
   };

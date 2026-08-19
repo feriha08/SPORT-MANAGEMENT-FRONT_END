@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -8,6 +8,7 @@ import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaTrophy } from 'react-icons/fa'
 import { useAuth } from '../../context/authContext';
 import './auth.css';
 
+// Validation schema
 const loginSchema = yup.object({
   username: yup.string().required('Username is required'),
   password: yup.string().required('Password is required'),
@@ -17,8 +18,29 @@ const loginSchema = yup.object({
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  // If already authenticated, redirect to appropriate dashboard
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      redirectUser(user);
+    }
+  }, [isAuthenticated, user]);
+
+  const redirectUser = (userData) => {
+    const role = userData?.role || 'public_user';
+    
+    if (role === 'Super Admin' || role === 'super_admin') {
+      navigate('/admin/dashboard', { replace: true });
+    } else if (role === 'School Admin' || role === 'school_admin') {
+      navigate('/school/dashboard', { replace: true });
+    } else if (role === 'Referee' || role === 'referee') {
+      navigate('/referee/dashboard', { replace: true });
+    } else {
+      navigate('/', { replace: true });
+    }
+  };
 
   const {
     register,
@@ -36,38 +58,41 @@ const Login = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
+      // Clear any old tokens before login
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      
       const result = await login(data.username, data.password);
       
       if (result.success) {
         toast.success('Login successful!');
         
         const userData = result.user;
-        console.log('User data:', userData);
-        console.log('User role:', userData?.role);
+        console.log('User logged in:', userData);
         
-        // SIMPLE REDIRECT LOGIC
-        const role = userData?.role || 'public_user';
-        
-        // Use window.location for force redirect
-        if (role === 'Super Admin') {
-          console.log('Redirecting to admin dashboard...');
-          window.location.href = '/admin/dashboard';
-        } else if (role === 'school_admin' || role === 'School Admin') {
-          console.log('Redirecting to school dashboard...');
-          window.location.href = '/school/dashboard';
-        } else if (role === 'referee' || role === 'Referee') {
-          console.log('Redirecting to referee dashboard...');
-          window.location.href = '/referee/dashboard';
-        } else {
-          console.log('Public user, redirecting to home...');
-          window.location.href = '/';
-        }
+        // Redirect based on role
+        redirectUser(userData);
       } else {
-        toast.error(result.error || 'Login failed');
+        toast.error(result.error || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Login error:', error);
-      toast.error('An error occurred during login');
+      
+      if (error.response) {
+        const errorData = error.response.data;
+        if (errorData.detail) {
+          toast.error(errorData.detail);
+        } else if (errorData.non_field_errors) {
+          toast.error(errorData.non_field_errors.join(', '));
+        } else {
+          toast.error('Login failed. Please try again.');
+        }
+      } else if (error.request) {
+        toast.error('Cannot connect to server. Please check if backend is running.');
+      } else {
+        toast.error('An error occurred during login. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -88,6 +113,7 @@ const Login = () => {
         <p className="login-subtitle">Sign in to your account</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="login-form">
+          {/* Username Field */}
           <div className="form-group">
             <label htmlFor="username">Username or Email</label>
             <div className="input-wrapper">
@@ -97,7 +123,9 @@ const Login = () => {
                 type="text"
                 placeholder="Enter your username"
                 {...register('username')}
-                className={errors.username ? 'error' : ''}
+                className={`form-control ${errors.username ? 'error' : ''}`}
+                autoComplete="username"
+                disabled={isLoading}
               />
             </div>
             {errors.username && (
@@ -105,6 +133,7 @@ const Login = () => {
             )}
           </div>
 
+          {/* Password Field */}
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <div className="input-wrapper">
@@ -114,12 +143,15 @@ const Login = () => {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 {...register('password')}
-                className={errors.password ? 'error' : ''}
+                className={`form-control ${errors.password ? 'error' : ''}`}
+                autoComplete="current-password"
+                disabled={isLoading}
               />
               <button
                 type="button"
                 className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
+                tabIndex="-1"
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
@@ -129,9 +161,10 @@ const Login = () => {
             )}
           </div>
 
+          {/* Options */}
           <div className="form-options">
             <label className="checkbox-label">
-              <input type="checkbox" {...register('rememberMe')} />
+              <input type="checkbox" {...register('rememberMe')} disabled={isLoading} />
               <span>Remember Me</span>
             </label>
             <Link to="/forgot-password" className="forgot-link">
@@ -139,15 +172,23 @@ const Login = () => {
             </Link>
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
-            className="btn btn-primary"
+            className="btn btn-primary login-btn"
             disabled={isLoading}
-            style={{ width: '100%',padding: '10px', borderRadius: '10px' }}
           >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {isLoading ? (
+              <>
+                <span className="spinner"></span>
+                Signing in...
+              </>
+            ) : (
+              'Sign In'
+            )}
           </button>
 
+          {/* Register Link */}
           <p className="register-link">
             Don't have an account? <Link to="/register">Register here</Link>
           </p>

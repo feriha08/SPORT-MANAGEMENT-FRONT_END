@@ -5,7 +5,8 @@ import {
   FaTrophy, FaCalendarAlt, FaUsers, FaClock,
   FaCheckCircle, FaHourglassHalf, FaTimesCircle,
   FaChevronLeft, FaChevronRight, FaFilter,
-  FaFutbol, FaVolleyballBall, FaBasketballBall
+  FaFutbol, FaVolleyballBall, FaBasketballBall,
+  FaSync  // ADD THIS
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../../api/axios';
@@ -32,7 +33,7 @@ const CompetitionList = () => {
     fetchSports();
   }, [currentPage, statusFilter, sportFilter, genderFilter]);
 
-  const fetchCompetitions = async () => {
+  const fetchCompetitions = async (forceRefresh = false) => {
     setLoading(true);
     try {
       const params = {
@@ -51,6 +52,10 @@ const CompetitionList = () => {
       }
       if (genderFilter !== 'All') {
         params.gender = genderFilter;
+      }
+
+      if (forceRefresh) {
+        params._ = Date.now();
       }
 
       const response = await axiosInstance.get('competitions/', { params });
@@ -76,6 +81,11 @@ const CompetitionList = () => {
     } catch (error) {
       console.error('Error fetching sports:', error);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchCompetitions(true);
+    toast.info('Data refreshed');
   };
 
   const handleSearch = (e) => {
@@ -212,9 +222,14 @@ const CompetitionList = () => {
           <h1 className="page-title">Competition Management</h1>
           <p className="page-subtitle">Manage all sports competitions</p>
         </div>
-        <Link to="/admin/competitions/create" className="btn btn-primary">
-          <FaPlus /> Create Competition
-        </Link>
+        <div className="header-actions">
+          <button onClick={handleRefresh} className="btn btn-secondary" title="Refresh data">
+            <FaSync /> Refresh
+          </button>
+          <Link to="/admin/competitions/create" className="btn btn-primary">
+            <FaPlus /> Create Competition
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FaPlus, FaEdit, FaTrash, FaEye, FaSearch,
-  FaFutbol, FaCalendarAlt, FaClock, FaMapMarkerAlt,
+  FaCalendarAlt, FaClock, FaMapMarkerAlt,
   FaCheckCircle, FaHourglassHalf, FaTimesCircle,
   FaChevronLeft, FaChevronRight, FaTrophy,
-  FaUsers, FaFileAlt
+  FaUsers, FaFileAlt, FaSync, FaFutbol
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../../api/axios';
@@ -38,7 +38,7 @@ const MatchList = () => {
     fetchFilters();
   }, [currentPage, statusFilter, competitionFilter, schoolFilter]);
 
-  const fetchMatches = async () => {
+  const fetchMatches = async (forceRefresh = false) => {
     setLoading(true);
     try {
       const params = {
@@ -59,6 +59,10 @@ const MatchList = () => {
         params.school = schoolFilter;
       }
 
+      if (forceRefresh) {
+        params._ = Date.now();
+      }
+
       const response = await axiosInstance.get('matches/', { params });
       console.log('Matches response:', response.data);
       
@@ -66,6 +70,8 @@ const MatchList = () => {
       
       if (response.data.count) {
         setTotalPages(Math.ceil(response.data.count / itemsPerPage));
+      } else {
+        setTotalPages(1);
       }
     } catch (error) {
       console.error('Error fetching matches:', error);
@@ -91,7 +97,7 @@ const MatchList = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1);
-    fetchMatches();
+    fetchMatches(true);
   };
 
   const handleDelete = async (match) => {
@@ -104,7 +110,7 @@ const MatchList = () => {
       await axiosInstance.delete(`matches/${selectedMatch.id}/manage/`);
       toast.success('Match deleted successfully');
       setShowDeleteModal(false);
-      fetchMatches();
+      fetchMatches(true);
     } catch (error) {
       console.error('Delete error:', error);
       toast.error('Failed to delete match');
@@ -129,11 +135,16 @@ const MatchList = () => {
       });
       toast.success('Match result submitted successfully');
       setShowResultModal(false);
-      fetchMatches();
+      fetchMatches(true);
     } catch (error) {
       console.error('Submit result error:', error);
       toast.error('Failed to submit match result');
     }
+  };
+
+  const handleRefresh = () => {
+    fetchMatches(true);
+    toast.info('Data refreshed');
   };
 
   const getStatusIcon = (status) => {
@@ -231,9 +242,9 @@ const MatchList = () => {
           <p className="page-subtitle">Manage all matches and fixtures</p>
         </div>
         <div className="header-actions">
-          <Link to="/admin/fixtures/generate" className="btn btn-success">
-            <FaFileAlt /> Generate Fixtures
-          </Link>
+          <button onClick={handleRefresh} className="btn btn-secondary" title="Refresh data">
+            <FaSync /> Refresh
+          </button>
           <Link to="/admin/matches/create" className="btn btn-primary">
             <FaPlus /> Create Match
           </Link>

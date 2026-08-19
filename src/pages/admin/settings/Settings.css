@@ -66,6 +66,13 @@
   font-weight: 600;
   font-size: 20px;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.settings-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .settings-user-info {
@@ -247,6 +254,82 @@
   margin-top: 4px;
 }
 
+/* Profile Picture Upload */
+.profile-picture-upload {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.profile-picture-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--light-gray);
+  border: 2px solid var(--medium-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-picture-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-picture-placeholder {
+  font-size: 32px;
+  color: var(--text-light);
+}
+
+.profile-picture-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profile-picture-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-family);
+  text-decoration: none;
+}
+
+.profile-picture-actions .btn-secondary {
+  background: var(--medium-gray);
+  color: var(--text-dark);
+}
+
+.profile-picture-actions .btn-secondary:hover {
+  background: var(--dark-gray);
+  color: var(--white);
+}
+
+.profile-picture-actions .btn-danger {
+  background: var(--accent-red);
+  color: var(--white);
+}
+
+.profile-picture-actions .btn-danger:hover {
+  background: #B71C1C;
+}
+
+.profile-picture-actions .btn-sm {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
 /* Notification Items */
 .notification-item {
   display: flex;
@@ -410,6 +493,22 @@
   background: #ffffff;
 }
 
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Responsive */
 @media (max-width: 992px) {
   .settings-layout {
@@ -477,6 +576,11 @@
 
   .page-title {
     font-size: 22px;
+  }
+
+  .profile-picture-upload {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 

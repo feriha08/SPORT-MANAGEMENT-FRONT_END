@@ -6,7 +6,8 @@ import {
   FaCheckCircle, FaHourglassHalf, FaTimesCircle,
   FaChevronLeft, FaChevronRight, FaTrophy,
   FaUsers, FaFileAlt, FaMagic, FaSitemap,
-  FaHome, FaSchool, FaUserGraduate, FaFutbol
+  FaHome, FaSchool, FaUserGraduate, FaFutbol,
+  FaSync
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../../api/axios';
@@ -20,6 +21,7 @@ const FixtureList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [stageFilter, setStageFilter] = useState('All');
   const [competitionFilter, setCompetitionFilter] = useState('All');
+  const [schoolFilter, setSchoolFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage] = useState(15);
@@ -27,15 +29,16 @@ const FixtureList = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [competitions, setCompetitions] = useState([]);
+  const [schools, setSchools] = useState([]);
   const [selectedCompetition, setSelectedCompetition] = useState('');
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     fetchFixtures();
-    fetchCompetitions();
-  }, [currentPage, stageFilter, competitionFilter]);
+    fetchFilters();
+  }, [currentPage, stageFilter, competitionFilter, schoolFilter]);
 
-  const fetchFixtures = async () => {
+  const fetchFixtures = async (forceRefresh = false) => {
     setLoading(true);
     try {
       const params = {
@@ -52,6 +55,13 @@ const FixtureList = () => {
       if (competitionFilter !== 'All') {
         params.competition = competitionFilter;
       }
+      if (schoolFilter !== 'All') {
+        params.school = schoolFilter;
+      }
+
+      if (forceRefresh) {
+        params._ = Date.now();
+      }
 
       const response = await axiosInstance.get('fixtures/', { params });
       console.log('Fixtures response:', response.data);
@@ -65,72 +75,29 @@ const FixtureList = () => {
       }
     } catch (error) {
       console.error('Error fetching fixtures:', error);
-      // Sample data if API fails
-      setFixtures([
-        {
-          id: 1,
-          home_team: 'Zanzibar High School',
-          away_team: 'Stone Town Secondary',
-          competition_name: 'Zanzibar Cup 2026',
-          stage: 'Quarter Final',
-          venue: 'Amaan Stadium',
-          match_date: '2026-07-20',
-          match_time: '14:00:00',
-          referee_name: 'Ali Juma'
-        },
-        {
-          id: 2,
-          home_team: 'Mombasa Academy',
-          away_team: 'Darajani School',
-          competition_name: 'Zanzibar Cup 2026',
-          stage: 'Quarter Final',
-          venue: 'Kikwajuni Ground',
-          match_date: '2026-07-20',
-          match_time: '16:00:00',
-          referee_name: 'Fatma Said'
-        },
-        {
-          id: 3,
-          home_team: 'Malindi School',
-          away_team: 'Mtoni Secondary',
-          competition_name: 'Zanzibar Cup 2026',
-          stage: 'Semi Final',
-          venue: 'Amaan Stadium',
-          match_date: '2026-07-25',
-          match_time: '14:00:00',
-          referee_name: 'Hassan Omar'
-        },
-        {
-          id: 4,
-          home_team: 'Zanzibar High School',
-          away_team: 'Mombasa Academy',
-          competition_name: 'Zanzibar Cup 2026',
-          stage: 'Final',
-          venue: 'Amaan Stadium',
-          match_date: '2026-07-30',
-          match_time: '16:00:00',
-          referee_name: 'Ali Juma'
-        }
-      ]);
-      toast.info('Showing sample fixtures. Connect to backend for real data.');
+      toast.error('Failed to load fixtures');
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchCompetitions = async () => {
+  const fetchFilters = async () => {
     try {
-      const response = await axiosInstance.get('competitions/');
-      setCompetitions(response.data.results || response.data || []);
+      const [competitionsRes, schoolsRes] = await Promise.all([
+        axiosInstance.get('competitions/'),
+        axiosInstance.get('schools/')
+      ]);
+      setCompetitions(competitionsRes.data.results || competitionsRes.data || []);
+      setSchools(schoolsRes.data.results || schoolsRes.data || []);
     } catch (error) {
-      console.error('Error fetching competitions:', error);
+      console.error('Error fetching filters:', error);
     }
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1);
-    fetchFixtures();
+    fetchFixtures(true);
   };
 
   const handleDelete = async (fixture) => {
@@ -143,7 +110,7 @@ const FixtureList = () => {
       await axiosInstance.delete(`fixtures/${selectedFixture.id}/manage/`);
       toast.success('Fixture deleted successfully');
       setShowDeleteModal(false);
-      fetchFixtures();
+      fetchFixtures(true);
     } catch (error) {
       console.error('Delete error:', error);
       toast.error('Failed to delete fixture');
@@ -166,13 +133,18 @@ const FixtureList = () => {
       toast.success(`Generated ${response.data.count || 0} fixtures successfully`);
       setShowGenerateModal(false);
       setSelectedCompetition('');
-      fetchFixtures();
+      fetchFixtures(true);
     } catch (error) {
       console.error('Generate fixtures error:', error);
-      toast.error('Failed to generate fixtures. Please try again.');
+      toast.error('Failed to generate fixtures');
     } finally {
       setGenerating(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchFixtures(true);
+    toast.info('Data refreshed');
   };
 
   const getStageClass = (stage) => {
@@ -262,6 +234,9 @@ const FixtureList = () => {
           <p className="page-subtitle">Manage all fixtures and generate match schedules</p>
         </div>
         <div className="header-actions">
+          <button onClick={handleRefresh} className="btn btn-secondary" title="Refresh data">
+            <FaSync /> Refresh
+          </button>
           <button onClick={handleGenerateFixtures} className="btn btn-success">
             <FaMagic /> Generate Fixtures
           </button>
@@ -322,6 +297,23 @@ const FixtureList = () => {
                 <option value="All">All Competitions</option>
                 {competitions.map(comp => (
                   <option key={comp.id} value={comp.id}>{comp.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-item">
+              <label>School:</label>
+              <select 
+                value={schoolFilter}
+                onChange={(e) => {
+                  setSchoolFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="filter-select"
+              >
+                <option value="All">All Schools</option>
+                {schools.map(school => (
+                  <option key={school.id} value={school.id}>{school.name}</option>
                 ))}
               </select>
             </div>
@@ -470,7 +462,7 @@ const FixtureList = () => {
                   <option value="">-- Select Competition --</option>
                   {competitions.map(comp => (
                     <option key={comp.id} value={comp.id}>
-                      {comp.name} ({comp.sport} - {comp.status || 'Draft'})
+                      {comp.name} ({comp.sport_name || comp.sport} - {comp.status || 'Draft'})
                     </option>
                   ))}
                 </select>
