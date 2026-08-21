@@ -4,12 +4,14 @@ import { toast } from 'react-toastify';
 import { 
   FaSchool, FaMapMarkerAlt, FaCity, FaEnvelope, 
   FaPhone, FaEdit, FaSave, FaImage,
-  FaGlobe, FaBuilding, FaUsers, FaTrophy
+  FaGlobe, FaBuilding, FaUsers, FaTrophy, FaArrowLeft,
+  FaPlus
 } from 'react-icons/fa';
 import axiosInstance from '../../api/axios';
+import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import './SchoolForm.css';
+import './SchoolProfile.css';
 
 const SchoolProfile = () => {
   const [school, setSchool] = useState(null);
@@ -19,6 +21,10 @@ const SchoolProfile = () => {
   const [logoPreview, setLogoPreview] = useState(null);
   const [logoFile, setLogoFile] = useState(null);
   const navigate = useNavigate();
+
+  // Get base URL from API URL
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/';
+  const BASE_URL = API_URL.replace('/api/', '').replace(/\/$/, '');
 
   const schoolLevels = [
     { value: 'primary', label: 'Primary School' },
@@ -43,19 +49,31 @@ const SchoolProfile = () => {
   const fetchSchoolProfile = async () => {
     try {
       const response = await axiosInstance.get('schools/profile/');
-      setSchool(response.data);
-      setFormData(response.data);
-      if (response.data.logo) {
-        setLogoPreview(response.data.logo);
+      
+      // Check if response.data is actually a school object
+      if (response.data && response.data.id) {
+        setSchool(response.data);
+        setFormData(response.data);
+        
+        // Create full logo URL if logo exists
+        if (response.data.logo) {
+          const logoUrl = response.data.logo.startsWith('http') 
+            ? response.data.logo 
+            : `${BASE_URL}${response.data.logo}`;
+          setLogoPreview(logoUrl);
+        } else {
+          setLogoPreview(null);
+        }
+      } else {
+        // No school data
+        setSchool(null);
+        toast.info('School not registered yet. Please register your school.');
       }
     } catch (error) {
       console.error('Error fetching school profile:', error);
       if (error.response?.status === 404) {
+        setSchool(null);
         toast.info('School not registered yet. Please register your school.');
-        navigate('/school/register');
-      } else if (error.response?.status === 403) {
-        toast.error('You do not have permission to view this profile.');
-        navigate('/school/dashboard');
       } else {
         toast.error('Failed to load school profile');
       }
@@ -108,6 +126,17 @@ const SchoolProfile = () => {
 
       setSchool(response.data);
       setEditing(false);
+      
+      // Update logo preview after save
+      if (response.data.logo) {
+        const logoUrl = response.data.logo.startsWith('http') 
+          ? response.data.logo 
+          : `${BASE_URL}${response.data.logo}`;
+        setLogoPreview(logoUrl);
+      } else {
+        setLogoPreview(null);
+      }
+      
       toast.success('School profile updated successfully!');
     } catch (error) {
       console.error('Error updating school:', error);
@@ -124,22 +153,31 @@ const SchoolProfile = () => {
   if (!school) {
     return (
       <div className="school-profile-empty">
+        <FaSchool className="empty-icon" />
         <h2>No School Registered</h2>
         <p>Please register your school to continue.</p>
-        <button onClick={() => navigate('/school/register')} className="btn btn-primary">
-          Register School
+        <button onClick={() => navigate('/school/register-school')} className="btn btn-primary">
+          <FaPlus /> Register School
         </button>
       </div>
     );
   }
 
+  // Create full logo URL for display
+  const displayLogoUrl = school.logo 
+    ? (school.logo.startsWith('http') ? school.logo : `${BASE_URL}${school.logo}`)
+    : null;
+
   return (
     <div className="school-profile-page">
       <div className="profile-header">
+        <button onClick={() => navigate('/school/dashboard')} className="btn btn-secondary">
+          <FaArrowLeft /> Back
+        </button>
         <h1 className="profile-title">School Profile</h1>
         <button 
           onClick={() => setEditing(!editing)} 
-          className="btn btn-secondary"
+          className="btn btn-primary"
         >
           {editing ? 'Cancel' : <><FaEdit /> Edit</>}
         </button>
@@ -150,7 +188,7 @@ const SchoolProfile = () => {
           <form onSubmit={handleUpdate}>
             <div className="form-grid">
               <div className="form-group form-group-full">
-                <label>School Name</label>
+                <label>School Name *</label>
                 <input
                   type="text"
                   name="name"
@@ -162,7 +200,7 @@ const SchoolProfile = () => {
               </div>
 
               <div className="form-group">
-                <label>School ID</label>
+                <label>School ID *</label>
                 <input
                   type="text"
                   name="school_id"
@@ -170,11 +208,12 @@ const SchoolProfile = () => {
                   onChange={handleInputChange}
                   className="form-control"
                   required
+                  disabled
                 />
               </div>
 
               <div className="form-group">
-                <label>Region</label>
+                <label>Region *</label>
                 <select
                   name="region"
                   value={formData.region || ''}
@@ -190,7 +229,7 @@ const SchoolProfile = () => {
               </div>
 
               <div className="form-group">
-                <label>District</label>
+                <label>District *</label>
                 <select
                   name="district"
                   value={formData.district || ''}
@@ -206,7 +245,7 @@ const SchoolProfile = () => {
               </div>
 
               <div className="form-group">
-                <label>School Level</label>
+                <label>School Level *</label>
                 <select
                   name="school_level"
                   value={formData.school_level || ''}
@@ -224,7 +263,7 @@ const SchoolProfile = () => {
               </div>
 
               <div className="form-group">
-                <label>Email</label>
+                <label>Email *</label>
                 <input
                   type="email"
                   name="email"
@@ -236,7 +275,7 @@ const SchoolProfile = () => {
               </div>
 
               <div className="form-group">
-                <label>Phone Number</label>
+                <label>Phone Number *</label>
                 <input
                   type="tel"
                   name="phone_number"
@@ -248,7 +287,7 @@ const SchoolProfile = () => {
               </div>
 
               <div className="form-group form-group-full">
-                <label>Address</label>
+                <label>Address *</label>
                 <textarea
                   name="address"
                   value={formData.address || ''}
@@ -296,16 +335,16 @@ const SchoolProfile = () => {
             </div>
 
             <div className="form-actions">
-              <button type="submit" className="btn btn-primary" disabled={loading}>
+              <Button type="submit" variant="primary" loading={loading}>
                 <FaSave /> Save Changes
-              </button>
+              </Button>
             </div>
           </form>
         ) : (
           <div className="profile-view">
             <div className="profile-logo">
-              {logoPreview ? (
-                <img src={logoPreview} alt={school.name} />
+              {displayLogoUrl ? (
+                <img src={displayLogoUrl} alt={school.name} />
               ) : (
                 <div className="logo-placeholder">
                   <FaSchool />
@@ -343,15 +382,10 @@ const SchoolProfile = () => {
                   <span>{school.address}</span>
                 </div>
               </div>
-              <div className="profile-stats">
-                <div className="stat">
-                  <FaUsers />
-                  <span>{school.student_count || 0} Students</span>
-                </div>
-                <div className="stat">
-                  <FaTrophy />
-                  <span>{school.competition_count || 0} Competitions</span>
-                </div>
+              <div className="profile-status">
+                <span className={`status-badge ${school.is_active ? 'active' : 'pending'}`}>
+                  {school.is_active ? 'Active' : 'Pending Approval'}
+                </span>
               </div>
             </div>
           </div>

@@ -34,8 +34,15 @@ import Settings from './pages/admin/settings/Settings';
 import SchoolDashboard from './pages/school/Dashboard';
 import RegisterSchool from './pages/school/RegisterSchool';
 import SchoolProfile from './pages/school/SchoolProfile';
+import SchoolStudents from './pages/school/SchoolStudents';
+import SchoolCreateStudent from './pages/school/CreateStudent';
+import SchoolEditStudent from './pages/school/EditStudent';
+import SchoolStudentDetail from './pages/school/StudentDetail';
 import RefereeDashboard from './pages/referee/Dashboard';
 import PublicDashboard from './pages/public/Home';
+import SchoolAdminLogin from './pages/school/SchoolAdminLogin';
+import SchoolAdminRegister from './pages/school/SchoolAdminRegister';
+import SchoolTeams from './pages/school/SchoolTeams';
 import './index.css';
 
 function App() {
@@ -48,6 +55,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/students/:id" element={<StudentProfile />} />
+          
+          {/* SCHOOL ADMIN AUTH ROUTES */}
+          <Route path="/school/login" element={<SchoolAdminLogin />} />
+          <Route path="/school/register" element={<SchoolAdminRegister />} />
           
           {/* SUPER ADMIN ROUTES */}
           <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['Super Admin']}><DashboardLayout><AdminDashboard /></DashboardLayout></ProtectedRoute>} />
@@ -76,8 +87,13 @@ function App() {
           
           {/* SCHOOL ADMIN ROUTES */}
           <Route path="/school/dashboard" element={<ProtectedRoute allowedRoles={['School Admin']}><DashboardLayout><SchoolDashboard /></DashboardLayout></ProtectedRoute>} />
-          <Route path="/school/register" element={<ProtectedRoute allowedRoles={['School Admin']}><DashboardLayout><RegisterSchool /></DashboardLayout></ProtectedRoute>} />
+          <Route path="/school/register-school" element={<ProtectedRoute allowedRoles={['School Admin']}><DashboardLayout><RegisterSchool /></DashboardLayout></ProtectedRoute>} />
           <Route path="/school/profile" element={<ProtectedRoute allowedRoles={['School Admin']}><DashboardLayout><SchoolProfile /></DashboardLayout></ProtectedRoute>} />
+          <Route path="/school/students" element={<ProtectedRoute allowedRoles={['School Admin']}><DashboardLayout><SchoolStudents /></DashboardLayout></ProtectedRoute>} />
+          <Route path="/school/students/create" element={<ProtectedRoute allowedRoles={['School Admin']}><DashboardLayout><SchoolCreateStudent /></DashboardLayout></ProtectedRoute>} />
+          <Route path="/school/students/:id" element={<ProtectedRoute allowedRoles={['School Admin']}><DashboardLayout><SchoolStudentDetail /></DashboardLayout></ProtectedRoute>} />
+          <Route path="/school/students/:id/edit" element={<ProtectedRoute allowedRoles={['School Admin']}><DashboardLayout><SchoolEditStudent /></DashboardLayout></ProtectedRoute>} />
+          <Route path="/school/teams" element={<ProtectedRoute allowedRoles={['School Admin']}><DashboardLayout><SchoolTeams /></DashboardLayout></ProtectedRoute>} />
           
           {/* REFEREE ROUTES */}
           <Route path="/referee/dashboard" element={<ProtectedRoute allowedRoles={['Referee']}><DashboardLayout><RefereeDashboard /></DashboardLayout></ProtectedRoute>} />

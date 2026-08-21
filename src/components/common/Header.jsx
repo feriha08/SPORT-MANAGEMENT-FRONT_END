@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaTrophy, FaUser, FaBell, FaSearch, FaSignOutAlt, FaCog } from 'react-icons/fa';
+import { FaTrophy, FaUser, FaBell, FaSearch, FaSignOutAlt, FaCog, FaSchool, FaTshirt, FaFutbol, FaChartBar, FaClipboardList, FaUserGraduate } from 'react-icons/fa';
 import { useAuth } from '../../context/authContext';
 import './Header.css';
 
@@ -11,7 +11,105 @@ const Header = ({ toggleSidebar }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    // Redirect based on user role
+    if (user?.role === 'super_admin') {
+      navigate('/login');
+    } else if (user?.role === 'school_admin') {
+      navigate('/school/login');
+    } else if (user?.role === 'referee') {
+      navigate('/login');
+    } else {
+      navigate('/login');
+    }
+  };
+
+  const getRoleLabel = (role) => {
+    switch (role) {
+      case 'super_admin':
+        return 'Super Admin';
+      case 'school_admin':
+        return 'School Admin';
+      case 'referee':
+        return 'Referee';
+      default:
+        return 'Guest';
+    }
+  };
+
+  const getDropdownItems = () => {
+    const role = user?.role || 'public_user';
+    
+    // SUPER ADMIN
+    if (role === 'super_admin') {
+      return (
+        <>
+          <Link to="/admin/dashboard" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+            <FaChartBar /> Admin Dashboard
+          </Link>
+          <Link to="/admin/schools" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+            <FaSchool /> Manage Schools
+          </Link>
+          <Link to="/admin/users" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+            <FaUser /> Manage Users
+          </Link>
+          <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+            <FaUser /> Profile
+          </Link>
+        </>
+      );
+    }
+    
+    // SCHOOL ADMIN
+    else if (role === 'school_admin') {
+      return (
+        <>
+          <Link to="/school/dashboard" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+            <FaChartBar /> School Dashboard
+          </Link>
+          <Link to="/school/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+            <FaSchool /> School Profile
+          </Link>
+          <Link to="/school/students" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+            <FaUserGraduate /> Manage Students
+          </Link>
+          <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+            <FaUser /> Profile
+          </Link>
+        </>
+      );
+    }
+    
+// SCHOOL ADMIN
+else if (role === 'school_admin') {
+  return (
+    <>
+      <Link to="/school/dashboard" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+        <FaChartBar /> School Dashboard
+      </Link>
+      <Link to="/school/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+        <FaSchool /> School Profile
+      </Link>
+      <Link to="/school/students" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+        <FaUserGraduate /> Manage Students
+      </Link>
+      <Link to="/school/teams" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+        <FaTshirt /> My Teams
+      </Link>
+      <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+        <FaUser /> Profile
+      </Link>
+    </>
+  );
+}
+    
+    // DEFAULT
+    return (
+      <>
+        <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+          <FaUser /> Profile
+        </Link>
+      </>
+    );
   };
 
   return (
@@ -56,16 +154,11 @@ const Header = ({ toggleSidebar }) => {
                 </div>
                 <div>
                   <p className="dropdown-name">{user?.full_name || user?.username || 'User'}</p>
-                  <p className="dropdown-role">{user?.role || 'Guest'}</p>
+                  <p className="dropdown-role">{getRoleLabel(user?.role)}</p>
                 </div>
               </div>
               <div className="dropdown-divider"></div>
-              <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
-                <FaUser /> Profile
-              </Link>
-              <Link to="/settings" className="dropdown-item" onClick={() => setShowDropdown(false)}>
-                <FaCog /> Settings
-              </Link>
+              {getDropdownItems()}
               <div className="dropdown-divider"></div>
               <button className="dropdown-item dropdown-logout" onClick={handleLogout}>
                 <FaSignOutAlt /> Logout

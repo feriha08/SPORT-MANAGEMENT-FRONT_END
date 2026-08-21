@@ -1,8 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import { toast } from 'react-toastify';
 import { 
   FaSchool, FaMapMarkerAlt, FaCity, FaEnvelope, 
@@ -11,46 +8,51 @@ import {
 } from 'react-icons/fa';
 import axiosInstance from '../../api/axios';
 import Card from '../../components/common/Card';
+import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import './SchoolForm.css';
-
-// Validation schema
-const schoolSchema = yup.object({
-  name: yup.string().required('School name is required'),
-  school_id: yup.string().required('School ID is required'),
-  region: yup.string().required('Region is required'),
-  district: yup.string().required('District is required'),
-  school_level: yup.string().required('School level is required'),
-  email: yup.string().required('Email is required').email('Invalid email format'),
-  phone_number: yup.string().required('Phone number is required'),
-  address: yup.string().required('Address is required'),
-  logo: yup.mixed().nullable(),
-});
+import './RegisterSchool.css';
 
 const RegisterSchool = () => {
   const [loading, setLoading] = useState(false);
+  const [checkingExisting, setCheckingExisting] = useState(true);
+  const [hasSchool, setHasSchool] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);
   const navigate = useNavigate();
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schoolSchema),
-    defaultValues: {
-      name: '',
-      school_id: '',
-      region: '',
-      district: '',
-      school_level: '',
-      email: '',
-      phone_number: '',
-      address: '',
-      logo: null,
-    },
+  const [formData, setFormData] = useState({
+    name: '',
+    school_id: '',
+    region: '',
+    district: '',
+    school_level: '',
+    email: '',
+    phone_number: '',
+    address: '',
+    logo: null
   });
+
+  // Check if school already exists
+  useEffect(() => {
+    checkExistingSchool();
+  }, []);
+
+  const checkExistingSchool = async () => {
+    try {
+      const response = await axiosInstance.get('schools/profile/');
+      if (response.data) {
+        // School already exists - show message but stay on page
+        setHasSchool(true);
+        toast.info('You already have a registered school. You can view it in School Profile.');
+      }
+    } catch (error) {
+      // 404 means no school - good, show register form
+      if (error.response?.status !== 404) {
+        console.error('Error checking school:', error);
+      }
+    } finally {
+      setCheckingExisting(false);
+    }
+  };
 
   const regions = [
     'Unguja North', 'Unguja South', 'Unguja Urban West',
@@ -68,10 +70,20 @@ const RegisterSchool = () => {
     { value: 'high', label: 'High School' }
   ];
 
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setValue('logo', file);
+      setFormData({
+        ...formData,
+        logo: file
+      });
       const reader = new FileReader();
       reader.onloadend = () => {
         setLogoPreview(reader.result);
@@ -80,75 +92,66 @@ const RegisterSchool = () => {
     }
   };
 
-  const onSubmit = async (data) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (hasSchool) {
+      toast.error('You already have a registered school!');
+      return;
+    }
+    
     setLoading(true);
+
     try {
-      const formData = new FormData();
-      formData.append('name', data.name);
-      formData.append('school_id', data.school_id);
-      formData.append('region', data.region);
-      formData.append('district', data.district);
-      formData.append('school_level', data.school_level);
-      formData.append('email', data.email);
-      formData.append('phone_number', data.phone_number);
-      formData.append('address', data.address);
-      if (data.logo) {
-        formData.append('logo', data.logo);
+      const formDataObj = new FormData();
+      formDataObj.append('name', formData.name);
+      formDataObj.append('school_id', formData.school_id);
+      formDataObj.append('region', formData.region);
+      formDataObj.append('district', formData.district);
+      formDataObj.append('school_level', formData.school_level);
+      formDataObj.append('email', formData.email);
+      formDataObj.append('phone_number', formData.phone_number);
+      formDataObj.append('address', formData.address);
+      if (formData.logo) {
+        formDataObj.append('logo', formData.logo);
       }
 
-      console.log('📤 Registering school with data:', data);
-
-      const response = await axiosInstance.post('schools/register/', formData, {
+      const response = await axiosInstance.post('schools/register/', formDataObj, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      console.log('✅ School registered:', response.data);
-      toast.success('🎉 School registered successfully!');
+      toast.success('🎉 School registered successfully! Waiting for approval.');
       
       setTimeout(() => {
         navigate('/school/profile');
       }, 1500);
     } catch (error) {
-      console.error('❌ Error registering school:', error);
+      console.error('Error registering school:', error);
       
-      if (error.response) {
-        const errorData = error.response.data;
-        let errorMessage = 'Failed to register school. ';
-        
-        if (typeof errorData === 'object') {
-          const errors = [];
-          for (const [field, messages] of Object.entries(errorData)) {
-            if (Array.isArray(messages)) {
-              errors.push(`${field}: ${messages.join(', ')}`);
-            } else if (typeof messages === 'string') {
-              errors.push(`${field}: ${messages}`);
-            }
-          }
-          if (errors.length > 0) {
-            errorMessage = errors.join('\n');
-          }
-        }
-        toast.error(errorMessage);
-      } else if (error.request) {
-        toast.error('Cannot connect to server. Please check if backend is running.');
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (data.school_id) toast.error(`School ID: ${data.school_id[0]}`);
+        else if (data.email) toast.error(`Email: ${data.email[0]}`);
+        else if (data.error) toast.error(data.error);
+        else toast.error('Failed to register school');
       } else {
-        toast.error('Failed to register school. Please try again.');
+        toast.error('Network error. Please try again.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
+  if (checkingExisting) {
     return <LoadingSpinner fullPage />;
   }
 
   return (
-    <div className="school-form-page">
+    <div className="register-school-page">
       <div className="form-header">
-        <button onClick={() => navigate(-1)} className="btn btn-secondary">
+        <button onClick={() => navigate('/school/dashboard')} className="btn btn-secondary">
           <FaArrowLeft /> Back
         </button>
         <div>
@@ -157,183 +160,147 @@ const RegisterSchool = () => {
         </div>
       </div>
 
+      {hasSchool && (
+        <div className="alert alert-warning">
+          <FaBuilding className="alert-icon" />
+          <div>
+            <strong>You already have a registered school!</strong>
+            <p>You cannot register another school. Please view your school profile.</p>
+          </div>
+          <button onClick={() => navigate('/school/profile')} className="btn btn-primary btn-sm">
+            View School Profile
+          </button>
+        </div>
+      )}
+
       <Card className="form-card">
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit}>
           <div className="form-grid">
-            {/* School Name */}
             <div className="form-group form-group-full">
-              <label htmlFor="name">
-                School Name <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <FaSchool className="input-icon" />
-                <input
-                  id="name"
-                  type="text"
-                  placeholder="Enter school name"
-                  {...register('name')}
-                  className={`form-control ${errors.name ? 'error' : ''}`}
-                />
-              </div>
-              {errors.name && (
-                <span className="error-message">{errors.name.message}</span>
-              )}
+              <label>School Name *</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter school name"
+                className="form-control"
+                required
+                disabled={hasSchool}
+              />
             </div>
 
-            {/* School ID */}
             <div className="form-group">
-              <label htmlFor="school_id">
-                School ID <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <FaBuilding className="input-icon" />
-                <input
-                  id="school_id"
-                  type="text"
-                  placeholder="Enter school ID"
-                  {...register('school_id')}
-                  className={`form-control ${errors.school_id ? 'error' : ''}`}
-                />
-              </div>
-              {errors.school_id && (
-                <span className="error-message">{errors.school_id.message}</span>
-              )}
+              <label>School ID *</label>
+              <input
+                type="text"
+                name="school_id"
+                value={formData.school_id}
+                onChange={handleChange}
+                placeholder="Enter school ID"
+                className="form-control"
+                required
+                disabled={hasSchool}
+              />
             </div>
 
-            {/* Region */}
             <div className="form-group">
-              <label htmlFor="region">
-                Region <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <FaMapMarkerAlt className="input-icon" />
-                <select
-                  id="region"
-                  {...register('region')}
-                  className={`form-control ${errors.region ? 'error' : ''}`}
-                >
-                  <option value="">Select Region</option>
-                  {regions.map((region) => (
-                    <option key={region} value={region}>{region}</option>
-                  ))}
-                </select>
-              </div>
-              {errors.region && (
-                <span className="error-message">{errors.region.message}</span>
-              )}
+              <label>Region *</label>
+              <select
+                name="region"
+                value={formData.region}
+                onChange={handleChange}
+                className="form-control"
+                required
+                disabled={hasSchool}
+              >
+                <option value="">Select Region</option>
+                {regions.map((region) => (
+                  <option key={region} value={region}>{region}</option>
+                ))}
+              </select>
             </div>
 
-            {/* District */}
             <div className="form-group">
-              <label htmlFor="district">
-                District <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <FaCity className="input-icon" />
-                <select
-                  id="district"
-                  {...register('district')}
-                  className={`form-control ${errors.district ? 'error' : ''}`}
-                >
-                  <option value="">Select District</option>
-                  {districts.map((district) => (
-                    <option key={district} value={district}>{district}</option>
-                  ))}
-                </select>
-              </div>
-              {errors.district && (
-                <span className="error-message">{errors.district.message}</span>
-              )}
+              <label>District *</label>
+              <select
+                name="district"
+                value={formData.district}
+                onChange={handleChange}
+                className="form-control"
+                required
+                disabled={hasSchool}
+              >
+                <option value="">Select District</option>
+                {districts.map((district) => (
+                  <option key={district} value={district}>{district}</option>
+                ))}
+              </select>
             </div>
 
-            {/* School Level */}
             <div className="form-group">
-              <label htmlFor="school_level">
-                School Level <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <FaGlobe className="input-icon" />
-                <select
-                  id="school_level"
-                  {...register('school_level')}
-                  className={`form-control ${errors.school_level ? 'error' : ''}`}
-                >
-                  <option value="">Select Level</option>
-                  {schoolLevels.map((level) => (
-                    <option key={level.value} value={level.value}>
-                      {level.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {errors.school_level && (
-                <span className="error-message">{errors.school_level.message}</span>
-              )}
+              <label>School Level *</label>
+              <select
+                name="school_level"
+                value={formData.school_level}
+                onChange={handleChange}
+                className="form-control"
+                required
+                disabled={hasSchool}
+              >
+                <option value="">Select Level</option>
+                {schoolLevels.map((level) => (
+                  <option key={level.value} value={level.value}>
+                    {level.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Email */}
             <div className="form-group">
-              <label htmlFor="email">
-                Email <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <FaEnvelope className="input-icon" />
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="Enter email address"
-                  {...register('email')}
-                  className={`form-control ${errors.email ? 'error' : ''}`}
-                />
-              </div>
-              {errors.email && (
-                <span className="error-message">{errors.email.message}</span>
-              )}
+              <label>Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter email address"
+                className="form-control"
+                required
+                disabled={hasSchool}
+              />
             </div>
 
-            {/* Phone Number */}
             <div className="form-group">
-              <label htmlFor="phone_number">
-                Phone Number <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <FaPhone className="input-icon" />
-                <input
-                  id="phone_number"
-                  type="tel"
-                  placeholder="Enter phone number"
-                  {...register('phone_number')}
-                  className={`form-control ${errors.phone_number ? 'error' : ''}`}
-                />
-              </div>
-              {errors.phone_number && (
-                <span className="error-message">{errors.phone_number.message}</span>
-              )}
+              <label>Phone Number *</label>
+              <input
+                type="tel"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                placeholder="Enter phone number"
+                className="form-control"
+                required
+                disabled={hasSchool}
+              />
             </div>
 
-            {/* Address */}
             <div className="form-group form-group-full">
-              <label htmlFor="address">
-                Address <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <FaMapMarkerAlt className="input-icon" />
-                <textarea
-                  id="address"
-                  placeholder="Enter school address"
-                  {...register('address')}
-                  className={`form-control ${errors.address ? 'error' : ''}`}
-                  rows="3"
-                />
-              </div>
-              {errors.address && (
-                <span className="error-message">{errors.address.message}</span>
-              )}
+              <label>Address *</label>
+              <textarea
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Enter school address"
+                className="form-control"
+                rows="3"
+                required
+                disabled={hasSchool}
+              />
             </div>
 
-            {/* Logo Upload */}
             <div className="form-group form-group-full">
-              <label htmlFor="logo">School Logo</label>
+              <label>School Logo</label>
               <div className="file-upload-wrapper">
                 <div className="file-upload-area">
                   {logoPreview ? (
@@ -344,7 +311,7 @@ const RegisterSchool = () => {
                         className="remove-logo"
                         onClick={() => {
                           setLogoPreview(null);
-                          setValue('logo', null);
+                          setFormData({ ...formData, logo: null });
                         }}
                       >
                         ✕
@@ -360,6 +327,7 @@ const RegisterSchool = () => {
                         accept="image/*"
                         onChange={handleLogoChange}
                         className="file-input"
+                        disabled={hasSchool}
                       />
                     </label>
                   )}
@@ -369,25 +337,9 @@ const RegisterSchool = () => {
           </div>
 
           <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)}>
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <span className="spinner"></span>
-                  Registering...
-                </>
-              ) : (
-                <>
-                  <FaSave /> Register School
-                </>
-              )}
-            </button>
+            <Button type="submit" variant="primary" loading={loading} disabled={hasSchool}>
+              <FaSave /> Register School
+            </Button>
           </div>
         </form>
       </Card>

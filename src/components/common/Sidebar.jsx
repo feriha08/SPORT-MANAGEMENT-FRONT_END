@@ -1,12 +1,13 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   FaTrophy, FaHome, FaUsers, FaSchool, 
   FaUserGraduate, FaCalendarAlt, FaFutbol,
   FaFileAlt, FaCog, FaSignOutAlt, FaChartBar,
   FaTshirt, FaUserCog, FaClipboardList, FaPlus,
   FaUserPlus, FaEdit, FaTrash, FaEye, FaSearch,
-  FaBuilding, FaUserCircle, FaUserTie
+  FaBuilding, FaUserCircle, FaUserTie, FaRegChartBar,
+  FaUsersCog
 } from 'react-icons/fa';
 import { useAuth } from '../../context/authContext';
 import './Sidebar.css';
@@ -14,6 +15,7 @@ import './Sidebar.css';
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
@@ -21,7 +23,29 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
   const handleLogout = () => {
     logout();
-    window.location.href = '/login';
+    // Redirect based on user role
+    if (user?.role === 'super_admin') {
+      navigate('/login');
+    } else if (user?.role === 'school_admin') {
+      navigate('/school/login');
+    } else if (user?.role === 'referee') {
+      navigate('/login');
+    } else {
+      navigate('/login');
+    }
+  };
+
+  const getRoleLabel = (role) => {
+    switch (role) {
+      case 'super_admin':
+        return 'Super Admin';
+      case 'school_admin':
+        return 'School Admin';
+      case 'referee':
+        return 'Referee';
+      default:
+        return 'Guest';
+    }
   };
 
   // Navigation items based on role
@@ -33,11 +57,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       return [
         { path: '/admin/dashboard', icon: <FaHome />, label: 'Dashboard' },
         { path: '/admin/users', icon: <FaUsers />, label: 'Users' },
-        // REMOVED: Create User - is available as button in Users page
         { path: '/admin/schools', icon: <FaSchool />, label: 'Schools' },
         { path: '/admin/students', icon: <FaUserGraduate />, label: 'Students' },
         { path: '/admin/competitions', icon: <FaTrophy />, label: 'Competitions' },
-        // REMOVED: Create Competition - is available as button in Competitions page
         { path: '/admin/fixtures', icon: <FaCalendarAlt />, label: 'Fixtures' },
         { path: '/admin/matches', icon: <FaFutbol />, label: 'Matches' },
         { path: '/admin/reports', icon: <FaFileAlt />, label: 'Reports' },
@@ -49,11 +71,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     else if (role === 'School Admin' || role === 'school_admin') {
       return [
         { path: '/school/dashboard', icon: <FaHome />, label: 'Dashboard' },
-        { path: '/school/register', icon: <FaPlus />, label: 'Register School' },
+        { path: '/school/register-school', icon: <FaPlus />, label: 'Register School' },
         { path: '/school/profile', icon: <FaBuilding />, label: 'School Profile' },
         { path: '/school/students', icon: <FaUserGraduate />, label: 'Students' },
-        { path: '/school/competitions', icon: <FaTrophy />, label: 'Competitions' },
         { path: '/school/teams', icon: <FaTshirt />, label: 'My Teams' },
+        { path: '/school/competitions', icon: <FaTrophy />, label: 'Competitions' },
         { path: '/school/fixtures', icon: <FaCalendarAlt />, label: 'Fixtures' },
         { path: '/school/matches', icon: <FaFutbol />, label: 'Matches' },
         { path: '/school/reports', icon: <FaFileAlt />, label: 'Reports' },
@@ -105,10 +127,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <div className="sidebar-user-info">
             <p className="sidebar-user-name">{user?.full_name || user?.username || 'User'}</p>
             <p className="sidebar-user-role">
-              {user?.role === 'super_admin' ? 'Super Admin' : 
-               user?.role === 'school_admin' ? 'School Admin' : 
-               user?.role === 'referee' ? 'Referee' : 
-               user?.role || 'Guest'}
+              {getRoleLabel(user?.role)}
             </p>
           </div>
         </div>

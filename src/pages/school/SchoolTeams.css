@@ -1,0 +1,299 @@
+/* School Teams Page Styles */
+
+.school-teams-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 24px;
+  background: var(--white);
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--text-light);
+  margin: 4px 0 0 0;
+}
+
+/* Teams Grid */
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Team Card */
+.team-card {
+  padding: 24px;
+}
+
+.team-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.team-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: rgba(27, 77, 139, 0.1);
+  color: var(--main-blue);
+}
+
+.team-info {
+  flex: 1;
+}
+
+.team-info h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.team-meta {
+  font-size: 13px;
+  color: var(--text-light);
+  margin: 4px 0 0 0;
+}
+
+.team-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.team-status.ready {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.team-status.pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+}
+
+/* Progress Bar */
+.team-progress {
+  height: 8px;
+  background: var(--medium-gray);
+  border-radius: 4px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--main-blue);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-bar.ready {
+  background: var(--accent-green);
+}
+
+/* Squad Info */
+.squad-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-light);
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: var(--light-gray);
+  border-radius: 8px;
+}
+
+/* Team Members */
+.team-members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.team-member-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: var(--light-gray);
+  border-radius: 8px;
+}
+
+.member-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--main-blue);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.member-info {
+  flex: 1;
+}
+
+.member-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.member-details {
+  font-size: 12px;
+  color: var(--text-light);
+  margin: 2px 0 0 0;
+}
+
+.member-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.remove-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-btn:hover {
+  background: var(--error);
+  color: var(--white);
+}
+
+/* No Members */
+.no-members {
+  text-align: center;
+  padding: 24px;
+}
+
+.empty-icon {
+  font-size: 32px;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+
+.no-members p {
+  font-size: 14px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* Team Actions */
+.team-actions {
+  margin-top: 16px;
+}
+
+.full-message {
+  text-align: center;
+  font-size: 13px;
+  color: var(--warning);
+  margin: 8px 0 0 0;
+}
+
+/* Available Students Modal */
+.available-students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-instruction {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+
+.available-student-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--light-gray);
+  border-radius: 8px;
+}
+
+.add-player-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--main-blue);
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+}
+
+.add-player-btn:hover {
+  background: var(--dark-blue);
+}
+
+/* No Available Students */
+.no-available-students {
+  text-align: center;
+  padding: 24px;
+}
+
+.no-available-students p {
+  font-size: 14px;
+  color: var(--text-light);
+  margin: 8px 0 16px 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .teams-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .teams-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .school-teams-page {
+    padding: 16px;
+  }
+}
